@@ -14,10 +14,6 @@
 
 import Foundation
 
-public protocol Numbered {
-    var number : Int { get}
-}
-
 @frozen public enum SortOrder : String , CaseIterable, Identifiable  {
     public var id: Self { self }
     
@@ -25,49 +21,24 @@ public protocol Numbered {
     
     
 }
-public struct SortableKeyPath<Model : Sendable,Key:Comparable>  : Sendable{
-    
-    let key : KeyPath<Model, Key > 
-    
-    func value(for model : Model) -> some Comparable {
-        model[keyPath: key]
-    }
-    
-    init(_ key: KeyPath<Model,Key> ) {
-        self.key = key
-    }
-}
 
 
-public final actor Sorter<T : Sendable> where T : Numbered {
+
+public final actor Sorter<T : Sendable> {
     
    
     
-    init(models: [T], keys: [AnySorter<T>]) {
-        self.models = models
-        
-        var allKeys = keys
-    
-//        if keys.contains(\.number) {
-//            allKeys.append(\.number)
-//        }
-        self.sorters = allKeys
-        
-        
-        self.selectedKey = \.number
-        self.sortOrder = .ascending
+    init() {
+  
     }
-    
-    let models : [T]
-    
-    let sorters : [AnySorter<T>]
-    
-    
-    
-    var selectedKey : PartialKeyPath<T>
-    var sortOrder : SortOrder = .descending
-    
-    
+
+    func sort(_ models : [T] ,  by sorter : AnySorter<T>) async -> [T] {
+       return await Task.detached {
+            return await sorter.sorted(models)
+        }.value
+        
+        
+    }
 //    func sort(by key : AnySearchableKey<T>) async -> [T] {
 //        let allModels = self.models
 //        let sorOrder = sortOrder

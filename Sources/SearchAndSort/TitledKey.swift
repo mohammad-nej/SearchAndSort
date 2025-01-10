@@ -33,3 +33,11 @@ public struct TitledKey<Model : Sendable ,Key , Stringified : Stringifier> : Sea
 }
 
 
+extension TitledKey where Key : Comparable {
+    
+    init<S : SortableKeyPathProtocol>(title: String , key : S , stringifier : Stringified ) where S.Key == Key , S.Model == Model , Stringified.Model == S.Key  {
+        self.title = title
+        self.key = key.key
+        self.stringer = stringifier
+    }
+}
