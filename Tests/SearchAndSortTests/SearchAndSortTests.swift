@@ -185,7 +185,7 @@ struct Tests {
         //Passing first search term
         async let firstResult = searcher.search(bigArray.randomElement()!.description)
         
-        //await searcher.cancelAllTasks()
+        
       
         
         sleep(2)

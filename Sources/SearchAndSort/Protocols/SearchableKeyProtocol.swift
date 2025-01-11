@@ -13,13 +13,10 @@ public protocol SearchableKeyProtocol : Sendable where Stringer.Model == Key   {
     associatedtype Item : Sendable
     associatedtype Key
     associatedtype Stringer : Stringifier
-    
-    //associatedtype Stringified : Stringifier
-    //var title : String { get}
+
     var key : KeyPath<Item , Key>  { get set}
     var stringer : Stringer { get}
-    //var stringer :
-    //func stringify(_ model : Model) -> [String]
+
 }
 public extension SearchableKeyProtocol {
     func stringify(_ model: Item) -> [String] {

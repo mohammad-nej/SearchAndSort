@@ -125,14 +125,14 @@ public final actor BackgroundSearcher<T : Sendable>  {
                         if Task.isCancelled{
                             self.logger.debug("Task for  \(query) from \(firstIndex) to \(lastIndex) cancelled")
                             return nil}
-                        //self.logger.debug("task number \(currentIndex) started...")
+                        
                      
                         self.logger.debug("Searching from \(firstIndex) to \(lastIndex) for \(query)...")
                         let partialResult =
                         await self.singleThreadSearch(query
                                                       ,models: _allModels[firstIndex..<lastIndex]
                                                       , withKeys: key)
-                        //currentChunk = chunks.index(after: currentChunk)
+                        
                         guard let partialResult else { return nil }
                         return partialResult
                     }
@@ -229,8 +229,8 @@ public final actor BackgroundSearcher<T : Sendable>  {
         let allModels = _allModels
         let searchingKeys = key == nil ? self.keys : key!
         let checker = self.checkIf
-        let task  = Task.detached(priority: .userInitiated) { //[weak self] in
-            //guard let self else { return Optional<[T]>.none }
+        let task  = Task.detached(priority: .userInitiated) {
+            
             MODELS: for model in allModels {
                 if  Task.isCancelled  {
                     self.logger.debug("Task for \(query) cancelled")
