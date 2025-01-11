@@ -9,7 +9,7 @@
 import Foundation
 import Foundation
 
-public protocol SearchableKey : Sendable where Stringer.Model == Key   {
+public protocol SearchableKeyProtocol : Sendable where Stringer.Model == Key   {
     associatedtype Item : Sendable
     associatedtype Key
     associatedtype Stringer : Stringifier
@@ -21,7 +21,7 @@ public protocol SearchableKey : Sendable where Stringer.Model == Key   {
     //var stringer :
     //func stringify(_ model : Model) -> [String]
 }
-extension SearchableKey {
+extension SearchableKeyProtocol {
     func stringify(_ model: Item) -> [String] {
         return stringer.stringify(model[keyPath:key])
     }

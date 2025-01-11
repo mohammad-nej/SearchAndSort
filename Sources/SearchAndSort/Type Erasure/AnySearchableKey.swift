@@ -4,7 +4,7 @@ public struct AnySearchableKey<Root : Sendable> : Sendable{
     
     let partialKey : PartialKeyPath<Root> 
     
-    init<T : SearchableKey>(_ item : T) where T.Item == Root  {
+    init<T : SearchableKeyProtocol>(_ item : T) where T.Item == Root  {
         self.stringProducer = { model in
             return item.stringify(model)
         }

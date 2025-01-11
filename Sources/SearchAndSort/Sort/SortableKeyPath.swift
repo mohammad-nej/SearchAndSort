@@ -28,14 +28,24 @@ public struct SortableKeyPath<M : Sendable,K : Comparable> : SortableKeyPathProt
     }
 }
 
-public struct SortableTitledKeyPath<M : Sendable,K : Comparable> : SortableKeyPathProtocol, Sendable{
-    
-    public typealias Model = M
-    
-    public typealias Key = K
-    
-    
-    var title : String
-    
-    public let key : KeyPath<Model, Key >
+//public struct SortableTitledKeyPath<M : Sendable,K : Comparable> : SortableKeyPathProtocol, Sendable{
+//    
+//    public typealias Model = M
+//    
+//    public typealias Key = K
+//    
+//    
+//    var title : String
+//    
+//    public let key : KeyPath<Model, Key >
+//}
+public extension SortableKeyPath {
+    func sort(_ model : [M] , order : SortOrder) async-> [M] {
+        return await AnySorter(self, order: order).sorted(model)
+    }
 }
+//public extension SortableTitledKeyPath {
+//    func sort(_ model : [M] , order : SortOrder) async-> [M] {
+//        return await AnySorter(self, order: order).sorted(model)
+//    }
+//}

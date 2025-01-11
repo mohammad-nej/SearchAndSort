@@ -9,7 +9,7 @@
 import Foundation
 import Foundation
 
-public struct TitledKey<Model : Sendable ,Key , Stringified : Stringifier> : SearchableKey , Sendable where Stringified.Model == Key {
+public struct TitledKey<Model : Sendable ,Key , Stringified : Stringifier> : SearchableKeyProtocol , Sendable where Stringified.Model == Key {
     
     
     

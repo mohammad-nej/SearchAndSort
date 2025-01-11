@@ -53,12 +53,15 @@ struct Tests {
         
         let studensts = [hamid,ali]
             
+        let searchableName = SearchableKeyPath(key: \Student.family, stringifier: FamilyStringifier())
         let namePath = SortableKeyPath(\Student.name)
         
         let ageKeyPath = SortableKeyPath(\Student.age)
         //let ageKeyPath = SortableTitledKeyPath(title: "Age", key: \Student.age)
         
         let titledKey = TitledKey(title: "Name", key: namePath , stringifier: .default )
+        
+        let searcher = BackgroundSearcher(models: studensts, keys: [.init(titledKey)])
         
         let familyKey = TitledKey(title: "Family", key: \Student.family, stringer: FamilyStringifier())
         
