@@ -11,7 +11,7 @@ public protocol  SortableKeyPathProtocol : Sendable{
     
     var key : KeyPath<Model, Key> { get }
 }
-extension SortableKeyPathProtocol{
+public extension SortableKeyPathProtocol{
     func value(for model : Model) -> Key {
         model[keyPath: key]
     }

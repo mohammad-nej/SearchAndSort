@@ -72,7 +72,7 @@ struct Tests {
         //let errorSorter = AnySorter(familyKey,order: .init(from: .ascending))
         
                 
-         let sortedByAge = await AnySorter(ageKeyPath, order: .ascending).sorted(studensts)
+         let sortedByAge = await AnySortableKey(ageKeyPath, order: .ascending).sorted(studensts)
         #expect(studensts[1] == sortedByAge[0])
         #expect(studensts[0] == sortedByAge[1])
         
@@ -82,7 +82,50 @@ struct Tests {
         #expect(studensts[0] == sortedByName[0])
         #expect(studensts[1] == sortedByName[1])
     }
-    
+    @Test func singleThreadSearchTest() async throws {
+        let studnets : [Student] = [
+            .init(name: "John", age: 20, grade: 12.5, birthDate: .now ,family:.init(name: "Potter")),
+            .init(name: "Jane", age: 21, grade: 13.5, birthDate: .now ,family:.init(name: "Potter")),
+            .init(name: "Jack", age: 22, grade: 14.5, birthDate: .now ,family:.init(name: "Potter")),
+            .init(name: "Jill", age: 23, grade: 15.5, birthDate: .now ,family:.init(name: "Potter")),
+            .init(name: "John", age: 24, grade: 16.5, birthDate: .now ,family:.init(name: "Potter")),
+            .init(name: "Jane", age:25, grade: 17.5, birthDate: .now ,family:.init(name: "Potter"))
+        ]
+        
+        let nameKey = TitledKey(title: "Name", key: \Student.name)
+        let ageKey = TitledKey(title: "Age", key: \Student.age)
+        
+        let clock = ContinuousClock()
+        let nameResultNil = await nameKey.search(in: studnets, for: "Jane")
+        let ageResultNil = await ageKey.search(in: studnets, for: 27.description)
+        
+        let nameResult = try #require(nameResultNil)
+        let ageResult = try #require(ageResultNil)
+        #expect(nameResult.count == 2)
+        #expect(ageResult.count == 0)
+        
+        
+        
+    }
+    @Test func sortTest() async throws {
+        let studnets : [Student] = [
+            .init(name: "John", age: 20, grade: 12.5, birthDate: .now ,family:.init(name: "Potter")),
+            .init(name: "Jane", age: 21, grade: 13.5, birthDate: .now ,family:.init(name: "Potter")),
+            .init(name: "Jack", age: 22, grade: 14.5, birthDate: .now ,family:.init(name: "Potter")),
+            .init(name: "Jill", age: 23, grade: 15.5, birthDate: .now ,family:.init(name: "Potter")),
+            .init(name: "John", age: 24, grade: 16.5, birthDate: .now ,family:.init(name: "Potter")),
+            .init(name: "Jane", age:25, grade: 17.5, birthDate: .now ,family:.init(name: "Potter"))
+        ]
+        
+        let grade = TitledKey(title: "Grade", key: \Student.grade)
+        let nameKey = SortableKeyPath(\Student.name)
+        let sortedArray = await grade.sort(studnets, order: .descending)
+        
+        let keys : [AnySortableKey] = [.init(grade,order: .descending) , .init(nameKey, order: .descending)]
+        
+        #expect(sortedArray[0].grade == 17.5)
+        #expect(sortedArray.last!.grade == 12.5)
+    }
     @Test func multiThreadedSearch() async throws {
         
         //Creating a bigArray to search in
@@ -91,22 +134,17 @@ struct Tests {
         
         let maxRandNumber = arrayCount / 10
         
-        for index in 0..<arrayCount {
+        for _ in 0..<arrayCount {
             let randomNumber = Int.random(in: 0..<maxRandNumber)
             bigArray.append(randomNumber)
         }
         
-        let test = TitledKey(title: "Big Array", key: \Int.self)
-        
-        
-        
-        
-        //
         
         let arrayKey = TitledKey(title: "Big Array", key: \Int.self, stringifier: .default)
         
-        var searcher = BackgroundSearcher(models: bigArray , keys: [.init(arrayKey)])
+        let searcher = BackgroundSearcher(models: bigArray , keys: [.init(arrayKey)])
         
+   
         await searcher.setMaxNumberOfElementsInEachChunk(10000)
         
         let clock = ContinuousClock()
@@ -119,5 +157,63 @@ struct Tests {
         }
         logger.info("Search took \(result.description) for \(bigArray.count) elements.")
         
+    }
+    
+    ///This test might fail depending on how fast your device can proccess this job
+    @Test("Testing search cancellation") func cancelationTest() async throws {
+        //Creating a bigArray to search in
+        let arrayCount = 1_005_000
+        var bigArray : [Int] = []
+        
+        let maxRandNumber = arrayCount / 10
+        
+        for _ in 0..<arrayCount {
+            let randomNumber = Int.random(in: 0..<maxRandNumber)
+            bigArray.append(randomNumber)
+        }
+        
+        
+        
+        let arrayKey = TitledKey(title: "Big Array", key: \Int.self, stringifier: .default)
+        
+        let searcher = BackgroundSearcher(models: bigArray , keys: [.init(arrayKey)])
+        
+        
+        await searcher.setMaxNumberOfElementsInEachChunk(10000)
+        
+        
+        //Passing first search term
+        async let firstResult = searcher.search(bigArray.randomElement()!.description)
+        
+        //await searcher.cancelAllTasks()
+      
+        
+        sleep(2)
+        
+        async let secondResult = searcher.search(bigArray.randomElement()!.description)
+       
+        await #expect(secondResult != nil )
+        await #expect(firstResult == nil )
+       
+        
+    }
+    
+    @Test("Test different SearchStrategy s") func searchStrategyTest() async throws {
+        
+        let names = ["Mohammad" , "Mohsen" , "Ali" , "Mohammad Amin"]
+        
+        let nameKey = TitledKey(title: "Name", key: \String.self)
+        
+        let results = await nameKey.search(in: names, for: "Moh", strategy: .contains)
+        let unwrapped = try  #require(results)
+        #expect(unwrapped.count == 3)
+        
+        let results2 = await nameKey.search(in: names, for: "Mohammad", strategy: .prefix)
+        let unwrapped2 = try #require(results2)
+        #expect(unwrapped2.count == 2)
+        
+        let results3 = await nameKey.search(in: names, for: "Mohammad", strategy: .exact)
+        let unwrapped3 = try #require(results3)
+        #expect(unwrapped3.count == 1)
     }
 }

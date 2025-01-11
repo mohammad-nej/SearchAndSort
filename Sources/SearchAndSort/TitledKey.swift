@@ -51,12 +51,12 @@ public extension TitledKey where Key : Comparable {
     
     func sort(_ items : [Model] , order : SortOrder) async -> [Model] {
         let sortable = SortableKeyPath(self.key)
-        return await AnySorter(sortable,order: order).sorted(items)
+        return await AnySortableKey(sortable,order: order).sorted(items)
     }
 }
 public extension TitledKey {
-    func search(in models : [Model] , for query : String) async-> [Model]? {
-        let searcher = BackgroundSearcher(models:models,keys: [.init(self)])
+    func search(in models : [Model] , for query : String, strategy: SearchStrategy = .contains) async-> [Model]? {
+        let searcher = BackgroundSearcher(models:models,keys: [.init(self)],strategy: strategy)
         return await searcher.search(query)
     }
 }

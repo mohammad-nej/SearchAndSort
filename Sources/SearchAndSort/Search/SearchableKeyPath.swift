@@ -29,8 +29,8 @@ public struct SearchableKeyPath<Model : Sendable ,Key , Stringified : Stringifie
 }
 public extension SearchableKeyPath {
     
-    func search(in models : [Model], for query : String) async -> [Model]? {
-        let searcher = BackgroundSearcher(models:models,keys: [.init(self)])
+    func search(in models : [Model], for query : String, strategy : SearchStrategy = .contains) async -> [Model]? {
+        let searcher = BackgroundSearcher(models:models,keys: [.init(self)], strategy: strategy)
         return await searcher.search(query)
     }
 }

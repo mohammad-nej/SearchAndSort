@@ -1,3 +1,6 @@
+
+///A type erasure to store all kinds of SearchableKeyPath , TitledKey types in an array
+///as long as they have the same Model type
 public struct AnySearchableKey<Root : Sendable> : Sendable{
  
     private let stringProducer :  @Sendable (Root) -> [String]

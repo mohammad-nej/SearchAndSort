@@ -8,10 +8,12 @@
 
 import Foundation
 
-public struct AnySorter<Model : Sendable> : Sendable{
+
+///A type-erasure to store all kinds of SortableKeyPath, TitledKey in a single array (as long as they have the same Model type).
+public struct AnySortableKey<Model : Sendable> : Sendable{
     
     typealias Value = Comparable
-    private let closure : @Sendable ([Model]) async -> [Model]
+    private let closure : @Sendable ([Model],SortOrder?) async -> [Model]
     
     let order : SortOrder
     
@@ -20,10 +22,11 @@ public struct AnySorter<Model : Sendable> : Sendable{
     
     init<T:Comparable>(_ item : SortableKeyPath<Model,T> , order : SortOrder ) {
         self.order = order
-        closure = { models in
+        closure = { models , order in
             models.sorted { first, second in
                 let value1 = item.value(for: first)
                 let value2 = item.value(for: second)
+                
                 if order == .ascending{
                     return value1 < value2
                 }else{
@@ -34,37 +37,21 @@ public struct AnySorter<Model : Sendable> : Sendable{
         
     }
     
-    func sorted(_ models : [Model]) async -> [Model] {
+    func sorted(_ models : [Model] , order : SortOrder? = nil) async -> [Model] {
+        let sortOrder = order == nil ? self.order : order
         return await Task.detached {
-            return await closure(models)
+            return await closure(models, sortOrder)
          }.value
     }
     
 }
-//public extension AnySorter {
-//    
-//    init<T:Comparable>(_ item : SortableTitledKeyPath<Model,T> , order : SortOrder ) {
-//        self.order = order
-//        closure = { models in
-//            models.sorted { first, second in
-//                let value1 = item.value(for: first)
-//                let value2 = item.value(for: second)
-//                if order == .ascending{
-//                    return value1 < value2
-//                }else{
-//                    return value1 > value2
-//                }
-//            }
-//        }
-//    }
-//
-//}
-public extension AnySorter {
+
+public extension AnySortableKey {
     init<Key:Comparable , Stringer>(_ item : TitledKey<Model, Key, Stringer>, order : SortOrder){
         
         self.order = order
         let key = SortableKeyPath(item.key)
-        self.closure = { models in
+        self.closure = { models, order in
             models.sorted { first, second in
                 let value1 = key.value(for: first)
                 let value2 = key.value(for: second)

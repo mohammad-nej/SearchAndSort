@@ -21,7 +21,7 @@ public protocol SearchableKeyProtocol : Sendable where Stringer.Model == Key   {
     //var stringer :
     //func stringify(_ model : Model) -> [String]
 }
-extension SearchableKeyProtocol {
+public extension SearchableKeyProtocol {
     func stringify(_ model: Item) -> [String] {
         return stringer.stringify(model[keyPath:key])
     }
