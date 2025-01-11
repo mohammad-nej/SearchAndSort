@@ -5,20 +5,13 @@
 //  Created by MohammavDev on 1/9/25.
 //
 
-//
-//  Background.swift
-//  MelikaArt
-//
-//  Created by MohammavDev on 11/4/24.
-//
 
 
 import SwiftData
 import Foundation
-
 import OSLog
 
-@frozen public enum SearchStrategy: CaseIterable , Sendable{
+ public enum SearchStrategy: CaseIterable , Sendable{
     case prefix
     case contains
     case exact
@@ -29,7 +22,7 @@ public final actor BackgroundSearcher<T : Sendable>  {
   
     
     
-    let logger = Logger(subsystem: "Background Searcher", category: "SearchAndSort")
+    private let logger = Logger(subsystem: "Background Searcher", category: "SearchAndSort")
     
     public private(set) var _allModels : [T]
     

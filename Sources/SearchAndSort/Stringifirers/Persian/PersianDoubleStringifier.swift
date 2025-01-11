@@ -32,7 +32,7 @@ public struct PersianDoubleStringifier : Stringifier , Sendable {
     public typealias Model = Double
     
 }
-public extension Stringifier where Model == Double {
-   
+public extension Stringifier where Self == PersianDoubleStringifier {
+    static var persian : Self {  .init() }
 }
 

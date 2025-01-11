@@ -119,12 +119,55 @@ struct Tests {
         
         let grade = TitledKey(title: "Grade", key: \Student.grade)
         let nameKey = SortableKeyPath(\Student.name)
+        //let sortedArray = nameKey.sort(students, order: .ascending)
         let sortedArray = await grade.sort(studnets, order: .descending)
         
         let keys : [AnySortableKey] = [.init(grade,order: .descending) , .init(nameKey, order: .descending)]
         
         #expect(sortedArray[0].grade == 17.5)
         #expect(sortedArray.last!.grade == 12.5)
+    }
+    
+    
+    @Test("Single thread Search doens't find anything") func notfound()async throws{
+        let studnets : [Student] = [
+            .init(name: "John", age: 20, grade: 12.5, birthDate: .now ,family:.init(name: "Potter")),
+            .init(name: "Jane", age: 21, grade: 13.5, birthDate: .now ,family:.init(name: "Potter")),
+            .init(name: "Jack", age: 22, grade: 14.5, birthDate: .now ,family:.init(name: "Potter")),
+            .init(name: "Jill", age: 23, grade: 15.5, birthDate: .now ,family:.init(name: "Potter")),
+            .init(name: "John", age: 24, grade: 16.5, birthDate: .now ,family:.init(name: "Potter")),
+            .init(name: "Jane", age:25, grade: 17.5, birthDate: .now ,family:.init(name: "Potter"))
+        ]
+        let nameKey = SearchableKeyPath(key:\Student.name)
+        let ageKey = SearchableKeyPath(key:\Student.age)
+     
+        
+        let searchResult = await ageKey.search(in:studnets , for: "Sara", strategy: .contains)
+        
+        #expect(searchResult == [])
+    }
+    @Test("Multi thread Search doens't find anything") func multythreadNotFound()async throws{
+        //Creating a bigArray to search in
+        let arrayCount = 100_500
+        var bigArray : [Int] = []
+        
+        let maxRandNumber = arrayCount / 10
+        
+        for _ in 0..<arrayCount {
+            let randomNumber = Int.random(in: 0..<maxRandNumber)
+            bigArray.append(randomNumber)
+        }
+        
+        
+        let arrayKey = TitledKey(title: "Big Array", key: \Int.self, stringifier: .default)
+        
+        let searcher = BackgroundSearcher(models: bigArray , keys: [.init(arrayKey)])
+        
+   
+        await searcher.setMaxNumberOfElementsInEachChunk(10000)
+        
+        let result = await searcher.search("-1")
+        #expect(result == [])
     }
     @Test func multiThreadedSearch() async throws {
         

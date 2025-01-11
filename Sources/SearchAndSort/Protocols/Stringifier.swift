@@ -15,3 +15,6 @@ public protocol Stringifier : Sendable  {
     
     func stringify(_ model : Model) -> [String]
 }
+
+
+

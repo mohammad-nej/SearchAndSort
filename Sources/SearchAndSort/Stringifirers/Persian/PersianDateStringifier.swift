@@ -17,15 +17,14 @@ public struct PersianDateStringifier : Stringifier , Sendable {
         formatter.locale = .init(identifier: "fa_IR")
         formatter.calendar = .init(identifier: .persian)
         
-        formatter.dateFormat = "YYYY/MM/DD - HH:MM:SS"
+        formatter.dateFormat = "YYYY/MM/dd - hh:mm:ss"
         
         results.append(formatter.string(from: model))
-        
         return results
     }
     
     
 }
 public extension Stringifier where Self == PersianDateStringifier {
-    
+    static var persian : Self { .init()}
 }

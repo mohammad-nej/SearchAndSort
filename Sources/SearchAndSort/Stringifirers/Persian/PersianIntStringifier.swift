@@ -24,4 +24,6 @@ public struct PersianIntStringifier : Stringifier, Sendable {
         return results
     }
 }
-
+public extension Stringifier where Self == PersianIntStringifier {
+    static var persian : Self { .init()}
+}
