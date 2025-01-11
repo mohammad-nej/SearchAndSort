@@ -205,7 +205,7 @@ struct Tests {
     ///This test might fail depending on how fast your device can proccess this job
     @Test("Testing search cancellation") func cancelationTest() async throws {
         //Creating a bigArray to search in
-        let arrayCount = 1_005_000
+        let arrayCount = 1_00_500_000
         var bigArray : [Int] = []
         
         let maxRandNumber = arrayCount / 10
@@ -229,9 +229,8 @@ struct Tests {
         async let firstResult = searcher.search(bigArray.randomElement()!.description)
         
         
-      
+        sleep(1)
         
-        sleep(2)
         
         async let secondResult = searcher.search(bigArray.randomElement()!.description)
        

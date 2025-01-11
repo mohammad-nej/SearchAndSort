@@ -94,7 +94,7 @@ public final actor BackgroundSearcher<T : Sendable>  {
                                                   models: _allModels[firstIndex..<lastIndex],
                                                   withKeys: key)
                     
-                    guard let partialResult else { return nil }
+                    
                     return partialResult
                     
                 }
@@ -126,7 +126,6 @@ public final actor BackgroundSearcher<T : Sendable>  {
                                                       ,models: _allModels[firstIndex..<lastIndex]
                                                       , withKeys: key)
                         
-                        guard let partialResult else { return nil }
                         return partialResult
                     }
                     
@@ -202,19 +201,21 @@ public final actor BackgroundSearcher<T : Sendable>  {
                 return _allModels
             }
         }
-        let allModels = _allModels
-        let minimumElementsToMultiThread = self.minimumElementsToMultiThread
-        let logger = logger
-     
-        if  allModels.count < minimumElementsToMultiThread{
-            
-            logger.debug("Searching with single thread...")
-            return  await singleThreadSearch(query , models: _allModels , withKeys: key)
-        }else {
-            logger.debug("Multi thread search...")
-            return await multiThreadSearch(query, withKeys: key)
-        }
-   
+        
+        
+            let allModels =  _allModels
+            let minimumElementsToMultiThread = self.minimumElementsToMultiThread
+            let logger = logger
+        return await Task.detached(priority: .userInitiated){ [self] in
+            if  allModels.count < minimumElementsToMultiThread{
+                
+                logger.debug("Searching with single thread...")
+                return  await self.singleThreadSearch(query , models: _allModels , withKeys: key)
+            }else {
+                logger.debug("Multi thread search...")
+                return await self.multiThreadSearch(query, withKeys: key)
+            }
+        }.value
     }
     private func singleThreadSearch(_ query : String , models: [T] ,withKeys key : [AnySearchableKey<T>]? = nil) async -> [T]? {
         
