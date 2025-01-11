@@ -35,11 +35,13 @@ public struct AnySorter<Model : Sendable> : Sendable{
     }
     
     func sorted(_ models : [Model]) async -> [Model] {
+        return await Task.detached {
             return await closure(models)
+         }.value
     }
     
 }
-extension AnySorter {
+public extension AnySorter {
     
     init<T:Comparable>(_ item : SortableTitledKeyPath<Model,T> , order : SortOrder ) {
         self.order = order
@@ -56,4 +58,23 @@ extension AnySorter {
         }
     }
 
+}
+public extension AnySorter {
+    init<Key:Comparable , Stringer>(_ item : TitledKey<Model, Key, Stringer>, order : SortOrder){
+        
+        self.order = order
+        let key = SortableKeyPath(item.key)
+        self.closure = { models in
+            models.sorted { first, second in
+                let value1 = key.value(for: first)
+                let value2 = key.value(for: second)
+                if order == .ascending{
+                    return value1 < value2
+                }else{
+                    return value1 > value2
+                }
+            }
+
+        }
+    }
 }

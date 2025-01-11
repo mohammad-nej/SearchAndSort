@@ -16,17 +16,33 @@
 import SwiftData
 import Foundation
 
-
+import OSLog
 
 public final actor BackgroundSearcher<T : Sendable>  {
     
+    let logger = Logger(subsystem: "Background Searcher", category: "SearchAndSort")
 
     public private(set) var _allModels : [T]
     
+    
+    ///This indicate that if you can use * in your search term to
+    ///return all models
     public let useWildCards : Bool
-    var tasks : [Task<[T]?, Never>] = []
+    private var tasks : [Task<[T]?, Never>] = []
     //private var isCanceled = false
     
+    ///This will change max number of threads that can run simoultaniusly,
+    ///it's advised to not inrease any more than 5-6.
+    public var maxNumberOfThreads : Int = 5
+    
+    ///If number  of elements in your array exceed these number, it will start to
+    ///create TaskGroup instead.
+    public var minimumElementsToMultiThread : Int = 1500
+    ///If TaskGroups are created this is the number of elements in each child task,
+    ///otherwise have no effect
+    public var maxNumberOfElementsInEachChunk : Int = 1000
+    
+    ///Keys that the searcher can search based of them.
     public let keys : [AnySearchableKey<T>]
 
     init(models : [T]  , keys : [AnySearchableKey<T>] = [] , useWildCards : Bool = true){
@@ -35,13 +51,116 @@ public final actor BackgroundSearcher<T : Sendable>  {
         self.keys = keys
         self.useWildCards = useWildCards
     }
-    public func seach(_ query : String , withKey key : AnySearchableKey<T>? = nil) async throws -> [T]? {
+    public func setMaxNumberOfElementsInEachChunk(_ maxNumberOfElementsInEachChunk : Int){
+        self.maxNumberOfElementsInEachChunk = maxNumberOfElementsInEachChunk
+    }
+    private func multiThreadSearch(_ query : String , withKey key : AnySearchableKey<T>? = nil) async  -> [T]? {
+       
+        let maxNumberOfElementsInEachChunk = self.maxNumberOfElementsInEachChunk
+        let maxNumberOfThreads = self.maxNumberOfThreads
         
+        let _allModels = self._allModels
+        return await withTaskGroup(of: [T].self, returning: [T]?.self) { group in
+            
+            
+            let chunksCount =  Int((Double(_allModels.count) / Double(maxNumberOfElementsInEachChunk)).rounded(.up))
+            logger.debug("models chunked into \(chunksCount) sub-arrays")
+            let numberOfTask = min(chunksCount , maxNumberOfThreads)
+            logger.debug("Number of concurrent tasks : \(numberOfTask)")
+            var index = 0
+            var finalResult : [T] = []
+            
+            
+            for index in 0..<numberOfTask {
+                group.addTask{
+                    //self.logger.debug("task number \(index) started...")
+                    let firstIndex =  index * maxNumberOfElementsInEachChunk
+                    let lastIndex =  min((index + 1) * maxNumberOfElementsInEachChunk , _allModels.count - 1)
+                    self.logger.debug("Searching from \(firstIndex) to \(lastIndex)")
+                    let partialResult =
+                    await self.singleThreadSearch(query ,
+                                                  models: _allModels[firstIndex...lastIndex]                                       , withKey: key)
+                    
+                    guard let partialResult else { return [] }
+                    return partialResult
+                    
+                }
+            }
+            index = numberOfTask
+            for await result in group {
+                
+                finalResult.append(contentsOf: result)
+                index += 1
+                
+                let currentIndex = index
+                if currentIndex < chunksCount {
+                    group.addTask {
+                        //self.logger.debug("task number \(currentIndex) started...")
+                        let firstIndex =  currentIndex * maxNumberOfElementsInEachChunk
+                        let lastIndex =  min((currentIndex + 1) * maxNumberOfElementsInEachChunk , _allModels.count - 1)
+                        self.logger.debug("Searching from \(firstIndex) to \(lastIndex)")
+                        let partialResult =
+                        await self.singleThreadSearch(query , models: _allModels[firstIndex...lastIndex]                                       , withKey: key)
+                        //currentChunk = chunks.index(after: currentChunk)
+                        guard let partialResult else { return [] }
+                        return partialResult
+                    }
+                    
+                }
+            }
+            logger.debug("Result : \(finalResult)")
+            return finalResult
+        }
+        
+        
+    }
+    private func singleThreadSearch(_ query : String , models: ArraySlice<T> ,withKey key : AnySearchableKey<T>? = nil) async  -> [T]? {
+        var resutls : [T] = []
+        let allModels = models
+        let searchingKeys = key == nil ? self.keys : [key!]
+        let checker = self.checkIf
+        let task  = Task.detached(priority: .userInitiated) {
+            MODELS: for model in allModels {
+                if  Task.isCancelled  {
+                    return Optional<[T]>.none
+                }
+                for key in searchingKeys {
+                   
+                    for value in key.stringify(model) {
+                        if checker(value, query) {
+                            resutls.append(model)
+                            continue MODELS
+                        }
+                    }
+                }
+            }
+            return resutls
+
+        }
+        
+        return await task.value
+        
+    }
+    ///You can pass a key to limit Searcher to that specefic key, otherwise it will itterate over all the keys.
+    ///This function use Task.detached internally so it will always run off the main thread
+    public func search(_ query : String , withKey key : AnySearchableKey<T>? = nil) async -> [T]? {
+        if _allModels.count < minimumElementsToMultiThread{
+            logger.debug("Searching with single thread...")
+            return  await singleThreadSearch(query , models: _allModels , withKey: key)
+        }else {
+            logger.debug("Multi thread search...")
+            return await multiThreadSearch(query, withKey: key)
+        }
+    }
+    private func singleThreadSearch(_ query : String , models: [T] ,withKey key : AnySearchableKey<T>? = nil) async -> [T]? {
+        logger.debug("Canceling previous tasks...")
         cancelAllTasks()
         guard query != ""   else { return nil}
         
         if useWildCards{
+            
             if query == "همه" || query == "*" {
+                logger.debug("Wildcard search found, returning all models...")
                 return _allModels
             }
         }
@@ -71,14 +190,14 @@ public final actor BackgroundSearcher<T : Sendable>  {
         tasks.append(task)
         return await task.value
     }
-    func cancelAllTasks(){
+    private func cancelAllTasks(){
         tasks.forEach{
             $0.cancel()
         }
         tasks.removeAll()
     }
     
-    func checkIf(_ object : String , has query : String) -> Bool{
+    private func checkIf(_ object : String , has query : String) -> Bool{
         
         
         let startsWtih = query.hasPrefix("“") || query.hasPrefix("\"")
@@ -97,98 +216,6 @@ public final actor BackgroundSearcher<T : Sendable>  {
             return object.contains(query) || object.contains(query.lowercased())
         }
     }
-//    func search(_ query : String, withKey key : PartialKeyPath<T>? = nil) async -> [T]?{
-//        
-//        cancelAllTasks()
-//       // await autoFetch()
-//        guard query != ""   else { return nil}
-//        
-//        if useWildCards{
-//            if query == "همه" || query == "*" {
-//                return _allModels
-//            }
-//        }
-//        let allModels = _allModels
-//        let keys = key == nil ?  self.keys : [key!]
-//        let task = Task.detached(priority: .userInitiated){ [weak self]  in
-//            guard let self else { return Optional<[T]>.none }
-//            var filtered : [T] = []
-//            let lowerCased = query.lowercased()
-//            
-//            
-//            MODELS: for  model in allModels {
-//                
-//                if Task.isCancelled { return Optional<[T]>.none }
-//                for key in   keys{
-//                    if let key = key as? KeyPath<T,Int> {
-//                        let modelKey = model[keyPath: key]
-//                        let result1 =  self.checkIf( modelKey.description, has: lowerCased)
-//                        let result2 =  self.checkIf( modelKey.formatted(), has: lowerCased)
-//                        
-//                        if result1 || result2  {
-//                            filtered.append(model)
-//                            continue MODELS
-//                        }
-//                        
-//                    }
-//                    
-//                    if let key = key as? KeyPath<T,Double>  {
-//                        let modelKey = model[keyPath: key]
-//                        let condition1 =  checkIf(modelKey.description, has: lowerCased)
-//                        let condition2 =  checkIf(modelKey.formatted(), has: lowerCased)
-//                        
-//                        
-//                        if  condition1 || condition2{
-//                            filtered.append(model)
-//                            continue MODELS
-//                        }
-//                        
-//                    }
-//                    
-//                    if let key = key as? KeyPath<T,String>  {
-//                        let modelKey = model[keyPath: key]
-//                        if  checkIf(modelKey.lowercased(), has: lowerCased) {
-//                            filtered.append(model)
-//                            continue MODELS
-//                        }
-//                        
-//                    }
-//                    
-//                    if let key = key as? KeyPath<T,Date>  {
-//                        let modelKey = model[keyPath: key]
-//                        let formatted = dateFormatter.string(from:  modelKey)
-//                        let secondFormat = secondDateFormatter.string(from:  modelKey)
-//                        
-//                        let condition1 =  checkIf(formatted,has:lowerCased)
-//                        let condition2 =  checkIf(secondFormat, has: lowerCased)
-//                        if condition1 || condition2  {
-//                            filtered.append(model)
-//                            continue MODELS
-//                        }
-//                        
-//                    }
-//                    let value = model[keyPath: key]
-//                    if let extracted = value as? (any MyIterableEnum){
-//                        
-//                        //let modelKey = model[keyPath: key]
-//                        let formatted = extracted.description
-//                        if checkIf(formatted, has: lowerCased){
-//                            filtered.append(model)
-//                            continue MODELS
-//                        }
-//                        
-//                    }
-//                    //debugginLogger.error("keypath \(key.hashValue) is not supported")
-//                }
-//            }
-//            
-//            return filtered
-//        }
-//        tasks.append(task)
-//        return await task.value
-//    }
-    
-    
-    
+
 }
 
