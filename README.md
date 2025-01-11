@@ -32,23 +32,23 @@ struct Student : Sendable {
 }
 ```
 
-if we want to sort an of `Student`s based on `name` : 
+if we want to sort an array of `Student`s based on `name` : 
 ```swift
  let students : [Studnet] = []
  // we fill the students array
  let nameKey = SortableKeyPath(\Student.name)
  let sortedArray = nameKey.sort(students, order: .ascending)
 ```
-### Type Erasing :
-in order to create a `SortableKeyPath` you type should be `Sendable` and the key should conform to `Comparable` protocol otherwise you will get compile-time error.
 
-if you want to be able to sort based on multiple `Key`s you can use `AnySortable` type erasure which will erase you `Key` type:
+in order to create a `SortableKeyPath` your type should be `Sendable` and the key should conform to `Comparable` protocol otherwise you will get compile-time error.
+### Type Erasing :
+if you want to be able to sort based on multiple `Key`s you can use `AnySortableKey` type erasure which will erase you `Key` type:
 ```swift
 let nameKey = SortableKeyPath(\Student.name)
 let ageKey = SortableKeyPath(\Student.age)
 let keys : [AnySortableKey] = [.init(nameKey,order: .ascending), .init(ageKey,order: .descending)]
 ```
-**Note:** this will only erase  `Key`s type, thus you can't store `SortableKeyPath`s of different models in the same array.
+**Note:** this will only erase `Key`s type, thus you can't store `SortableKeyPath`s of different models in the same array.
 
 ## Searching
  in order to be able to search based on a a `KeyPath` you need to provide a type conforming to  `Stringifier` protocol. This protocol only has 1 method : 
@@ -62,7 +62,7 @@ public protocol Stringifier : Sendable  {
 ```
 #### example:
 
-assuming that we want to impelent this protocol for `Int` type : 
+assuming that we want to implement this protocol for `Int` type : 
 ```swift
  struct IntStringifier : Stringifier, Sendable {
      func stringify(_ model: Int) -> [String] {
@@ -73,10 +73,10 @@ assuming that we want to impelent this protocol for `Int` type :
     }
 }
 ```
-this way when `BackgroundSearcher` is itterating over your models, it will converted every `Int` to an **array of strings** and match it with your search query.
-for example with this `IntStringifier` your use will get a match for 2000 ethier if he enters "2000" or "2,000" as query.
+this way when `BackgroundSearcher` is iterating over your models, it will converted every `Int` to an **array of strings** and match it with your search query.
+for example with this `IntStringifier` your user will get a match for 2000 either if he enters "2000" or "2,000" as query.
 
-**Goo news:** this package already impleneted `Stringifier` for `Date`,`Int`,`String`,`Double` and they are passed as default values thus you don't need to worry about that.
+**Good news:** this package already implemnted `Stringifier` for `Date`,`Int`,`String`,`Double`,`Bool` and they are passed as default values thus you don't need to worry about that.
 
 ### Creating SearchableKey:
 
@@ -103,15 +103,15 @@ let keys : [AnySearchableKey] = [.init(nameKey), .init(ageKey)]
 ## BackgroundSearcher
   this is an actor that actually does the search for you. it will create `Task.detached`(s) internally depending on the size of your array.
 
-  you can pass your models and keys to this type and let it do the search for you.
+  You can pass your models and keys to this type and let it do the search for you.
   ```swift
   let searcher = BackgroundSearcher(models: studnets,keys: [.init(nameKey),.init(ageKey)])
   await searcher.search("John" ,withKey: [.init(nameKey)] , strategy: .prefix)
   ```
   **Notes:**
-  1. if you dont provide a value for `withKey:` parameter it will itterate over all the `Key`s that you provided during initialzation.
+  1. if you don't provide a value for `withKey:` parameter it will iterate over all the `Key`s that you provided during initialization.
   2. when you are calling `search` directly from a `SearchableKeyPath` an instance of `BackgroundSearcher` is created internally.
-  3. `BackgroundSearcher` will create multiple `Task`s if you array size exceeds `1500`, you can change this number by setting `minimumElementsToMultiThread`.
+  3. `BackgroundSearcher` will create multiple `Task`s if your array size exceeds `1500`, you can change this number by setting `minimumElementsToMultiThread`.
 
 ## Sorter
 just like `BackgroundSearcher`, `Sorter` will let you store all your models and keys in one place:
@@ -131,5 +131,9 @@ this type can be replaced by `SearchableKeyPath` and you can also use it in plac
 
 so it can be used as an input to `BackgroundSearcher` , `AnySearchableKey` and `Sorter` , `AnySortableKey` ( if the key is `Comparable`). the only downside to use this type is that if you only want to do sort, you always have to provide `Stringifier` for your `Key` type.
 
+## Type Safety
+This package is completely **Type Safe** and you can't go wrong without getting compile time error. it also based on **Swift 6** so it's completely concurrency safe.
 
+# Copyright 
+This package is provided to use for free. if you want to know more feel free to contact me on GitHub or using my email : mohammad.nej@gmail.com
 
