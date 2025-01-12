@@ -52,7 +52,7 @@ public final actor BackgroundSearcher<T : Sendable>  {
     ///Keys that the searcher can search based of them.
     public let keys : [AnySearchableKey<T>]
     
-    init(models : [T]  , keys : [AnySearchableKey<T>] = [] ,strategy: SearchStrategy = .contains ,useWildCards : Bool = true){
+    public init(models : [T]  , keys : [AnySearchableKey<T>]  ,strategy: SearchStrategy = .contains ,useWildCards : Bool = true){
         
         _allModels = models
         self.keys = keys

@@ -222,6 +222,7 @@ struct Tests {
         let searcher = BackgroundSearcher(models: bigArray , keys: [.init(arrayKey)])
         
         
+        
         await searcher.setMaxNumberOfElementsInEachChunk(10000)
         
         
