@@ -268,6 +268,9 @@ public extension BackgroundSearcher {
 }
 
 public extension BackgroundSearcher {
+    func loadModels(_ models : [T]) {
+        _allModels = models
+    }
     private func checkIf(_ object : String , has query : String) -> Bool{
         
         switch searchStrategy {
