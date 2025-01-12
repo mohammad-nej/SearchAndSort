@@ -140,8 +140,12 @@ struct Tests {
         ]
         let nameKey = SearchableKeyPath(key:\Student.name)
         let ageKey = SearchableKeyPath(key:\Student.age)
-     
         
+        let anyNamekey = AnyKey(\Student.name, sortOrder: .ascending)
+        
+        let name = AnySearchableKey(\Student.name)
+        let age = AnySortableKey(\Student.name, order: .ascending)//.sorted(<#T##models: [_]##[_]#>, order: <#T##SortOrder?#>)
+        BackgroundSearcher(models: studnets, keys: [.init(\Student.name)])
         let searchResult = await ageKey.search(in:studnets , for: "Sara", strategy: .contains)
         
         #expect(searchResult == [])

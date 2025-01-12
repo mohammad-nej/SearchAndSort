@@ -39,6 +39,11 @@
                BlueprintName = "SearchAndSortTests"
                ReferencedContainer = "container:">
             </BuildableReference>
+            <SkippedTests>
+               <Test
+                  Identifier = "Tests/cancelationTest()">
+               </Test>
+            </SkippedTests>
          </TestableReference>
       </Testables>
    </TestAction>

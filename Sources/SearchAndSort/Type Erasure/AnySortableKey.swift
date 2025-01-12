@@ -64,4 +64,21 @@ public extension AnySortableKey {
 
         }
     }
+    init<Key: Comparable>(_ key : KeyPath<Model , Key>, order : SortOrder){
+        self.order = order
+        let key = SortableKeyPath(key)
+        self.closure = { models, order in
+            models.sorted { first, second in
+                let value1 = key.value(for: first)
+                let value2 = key.value(for: second)
+                if order == .ascending{
+                    return value1 < value2
+                }else{
+                    return value1 > value2
+                }
+            }
+
+        }
+
+    }
 }

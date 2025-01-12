@@ -52,6 +52,15 @@ public final actor BackgroundSearcher<T : Sendable>  {
     ///Keys that the searcher can search based of them.
     public let keys : [AnySearchableKey<T>]
     
+    
+    public init (models : [T] , keys : [AnyKey<T>],strategy: SearchStrategy = .contains ,useWildCards : Bool = true){
+        _allModels = models
+        self.keys = keys.map{ $0.anySearchableKey}
+        self.useWildCards = useWildCards
+        self.searchStrategy = strategy
+    }
+
+    
     public init(models : [T]  , keys : [AnySearchableKey<T>]  ,strategy: SearchStrategy = .contains ,useWildCards : Bool = true){
         
         _allModels = models
@@ -266,7 +275,8 @@ public extension BackgroundSearcher {
         self.searchStrategy = searchStrategy
     }
 }
-
+public extension BackgroundSearcher {
+}
 public extension BackgroundSearcher {
     func loadModels(_ models : [T]) {
         _allModels = models
