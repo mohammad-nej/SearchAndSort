@@ -15,12 +15,12 @@ public struct AnySortableKey<Model : Sendable> : Sendable{
     typealias Value = Comparable
     private let closure : @Sendable ([Model],SortOrder?) async -> [Model]
     
-    let order : SortOrder
+    public let order : SortOrder
     
     
     
     
-    init<T:Comparable>(_ item : SortableKeyPath<Model,T> , order : SortOrder ) {
+    public init<T:Comparable>(_ item : SortableKeyPath<Model,T> , order : SortOrder ) {
         self.order = order
         closure = { models , order in
             models.sorted { first, second in
@@ -37,7 +37,7 @@ public struct AnySortableKey<Model : Sendable> : Sendable{
         
     }
     
-    func sorted(_ models : [Model] , order : SortOrder? = nil) async -> [Model] {
+    public func sorted(_ models : [Model] , order : SortOrder? = nil) async -> [Model] {
         let sortOrder = order == nil ? self.order : order
         return await Task.detached {
             return await closure(models, sortOrder)

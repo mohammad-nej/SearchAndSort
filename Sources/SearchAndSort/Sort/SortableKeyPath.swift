@@ -22,7 +22,7 @@ public struct SortableKeyPath<M : Sendable,K : Comparable> : SortableKeyPathProt
     
    
     
-    init(_ key: KeyPath<Model,Key> ) {
+    public init(_ key: KeyPath<Model,Key> ) {
         self.key = key
     }
 }

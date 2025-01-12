@@ -18,11 +18,11 @@ public struct SearchableKeyPath<Model : Sendable ,Key , Stringified : Stringifie
     
     public var key: KeyPath<Item, Key>
     
-    init<T : SortableKeyPathProtocol>(key : T , stringifier : Stringified) where T.Model == Model, T.Key == Key{
+    public init<T : SortableKeyPathProtocol>(key : T , stringifier : Stringified) where T.Model == Model, T.Key == Key{
         self.key = key.key
         self.stringer = stringifier
     }
-    init(key: KeyPath<Item, Key> , stringifier : Stringified ) {
+    public init(key: KeyPath<Item, Key> , stringifier : Stringified ) {
         self.key = key
         self.stringer = stringifier
     }

@@ -10,11 +10,11 @@
 public struct Sorter<Model : Sendable> : Sendable {
     
     
-    let models : [Model]
-    let keys : [AnySortableKey<Model>]
+    public let models : [Model]
+    public let keys : [AnySortableKey<Model>]
     
     
-    func sort(by key : AnySortableKey<Model> , order : SortOrder? = nil) async-> [Model] {
+    public func sort(by key : AnySortableKey<Model> , order : SortOrder? = nil) async-> [Model] {
         
         let order = order == nil ? key.order : order!
         return await key.sorted(models, order: order)

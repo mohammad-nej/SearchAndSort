@@ -27,7 +27,7 @@ public struct TitledKey<Model : Sendable ,Key , Stringified : Stringifier> : Sea
     public var title: String
     public var key : KeyPath<Model, Key> 
     
-    init( title: String, key: KeyPath<Model, Key>,stringer: Stringified) {
+    public init( title: String, key: KeyPath<Model, Key>,stringer: Stringified) {
         self.stringer = stringer
         self.title = title
         self.key = key

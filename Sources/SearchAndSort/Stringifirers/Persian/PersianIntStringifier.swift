@@ -8,7 +8,7 @@
 import Foundation
 
 public struct PersianIntStringifier : Stringifier, Sendable {
-    static let persian : PersianIntStringifier = .init()
+    
     public func stringify(_ model: Int) -> [String] {
         var results = IntStringifier().stringify(model)
         
