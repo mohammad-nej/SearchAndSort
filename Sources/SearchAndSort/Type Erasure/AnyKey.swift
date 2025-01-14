@@ -16,36 +16,15 @@ public struct AnyKey<Root : Sendable> : Sendable {
     
     private let searchProducer : @Sendable ([Root], String, SearchStrategy) async -> [Root]?
     
+    
+    
     public let order : SortOrder
     
     public let partialKey : PartialKeyPath<Root>
     
     public let anySearchableKey : AnySearchableKey<Root>
     public let anySortableKey : AnySortableKey<Root>
-    
-    public init<T : SearchableKeyProtocol>(_ item : T , sortOrder : SortOrder) where T.Item == Root , T.Key : Comparable {
-        self.stringProducer = { model in
-            return item.stringify(model)
-        }
-        self.order = sortOrder
-        sorterProducer = { models , order in
-            let sortKey = SortableKeyPath(item.key)
-            return await sortKey.sort(models , order: order)
-        }
-        searchProducer = { models , query , strategy in
-            let key = SearchableKeyPath(key: item.key , stringifier: item.stringer)
-            
-            return await key.search(in: models, for: query,strategy: strategy)
-            
-        }
-        partialKey = item.key as PartialKeyPath<Root>
-        
-        anySearchableKey = AnySearchableKey(item)
-        let sortable = SortableKeyPath(item.key)
-        anySortableKey = AnySortableKey(sortable, order: sortOrder)
-        
-    }
-    
+
     public func stringify(_ model : Root ) -> [String] {
         
         stringProducer(model)
@@ -58,133 +37,174 @@ public struct AnyKey<Root : Sendable> : Sendable {
     }
     
 }
-public extension AnyKey  {
-    init<Stringer: Stringifier>(_ key : KeyPath<Root,String>,sortOrder : SortOrder ,stringer : Stringer = .default  ) where Stringer.Model == String   {
-
-        
-
-        self.stringProducer = { model in
-            return stringer.stringify(model[keyPath: key])
-        }
-        
-        sorterProducer = { models , order in
-            let sortKey = SortableKeyPath(key)
-            return await sortKey.sort(models , order: order)
-        }
-        searchProducer = { models , query,strategy in
-            let key = SearchableKeyPath(key: key , stringifier: stringer)
-            
-            return await key.search(in: models, for: query,strategy: strategy)
-            
-        }
-        partialKey = key as PartialKeyPath<Root>
-        
-        self.order = sortOrder
-        let searchableKey = SearchableKeyPath(key: key)
-        anySearchableKey = AnySearchableKey(searchableKey)
-        let sortable = SortableKeyPath(key)
-        anySortableKey = AnySortableKey(sortable, order: sortOrder)
-    }
-    init<Stringer: Stringifier>(_ key : KeyPath<Root,Int>,sortOrder : SortOrder ,stringer : Stringer = .default  ) where Stringer.Model == Int   {
-
-        
-
-        self.stringProducer = { model in
-            return stringer.stringify(model[keyPath: key])
-        }
-        
-        sorterProducer = { models , order in
-            let sortKey = SortableKeyPath(key)
-            return await sortKey.sort(models , order: order)
-        }
-        searchProducer = { models , query,strategy in
-            let key = SearchableKeyPath(key: key , stringifier: stringer)
-            
-            return await key.search(in: models, for: query,strategy: strategy)
-            
-        }
-        partialKey = key as PartialKeyPath<Root>
-        
-        self.order = sortOrder
-        let searchableKey = SearchableKeyPath(key: key)
-        anySearchableKey = AnySearchableKey(searchableKey)
-        let sortable = SortableKeyPath(key)
-        anySortableKey = AnySortableKey(sortable, order: sortOrder)
-    }
+public extension AnyKey {
+    init<Key : CustomStringConvertible>(_ key : KeyPath<Root,Key>,sortOrder : SortOrder) where Key : Comparable  {
     
-    init<Stringer: Stringifier>(_ key : KeyPath<Root,Double>,sortOrder : SortOrder ,stringer : Stringer = .default  ) where Stringer.Model == Double   {
         
-
+        let stringer = StringConvertableStringifier<Key>()
         self.stringProducer = { model in
             return stringer.stringify(model[keyPath: key])
         }
-        
+
         sorterProducer = { models , order in
-            let sortKey = SortableKeyPath(key)
+            let sortKey = SortableKeyPath(key, order: order)
             return await sortKey.sort(models , order: order)
         }
-        searchProducer = { models , query, strategy in
-            let key = SearchableKeyPath(key: key , stringifier: stringer)
-            
+        searchProducer = { models , query,strategy in
+            let key = SearchableKeyPath( key , stringifier: stringer)
+
             return await key.search(in: models, for: query,strategy: strategy)
-            
+
         }
         partialKey = key as PartialKeyPath<Root>
-        
+
         self.order = sortOrder
-        let searchableKey = SearchableKeyPath(key: key)
+        let searchableKey = SearchableKeyPath( key)
         anySearchableKey = AnySearchableKey(searchableKey)
-        let sortable = SortableKeyPath(key)
-        anySortableKey = AnySortableKey(sortable, order: sortOrder)
+        let sortable = SortableKeyPath(key, order: order)
+        anySortableKey = AnySortableKey(sortable)
     }
-    init<Stringer: Stringifier>(_ key : KeyPath<Root,Date>,sortOrder : SortOrder ,stringer : Stringer = .default  ) where Stringer.Model == Date   {
+    init<Key : CustomStringConvertible, Stringer : Stringifier>(_ key : KeyPath<Root,Key>,sortOrder : SortOrder , stringer : Stringer) where Key : Comparable ,Stringer.Model == Key  {
+    
         
+        
+        self.stringProducer = { model in
+            return stringer.stringify(model[keyPath: key])
+        }
 
-        self.stringProducer = { model in
-            return stringer.stringify(model[keyPath: key])
-        }
-        
         sorterProducer = { models , order in
-            let sortKey = SortableKeyPath(key)
+            let sortKey = SortableKeyPath(key, order: order)
             return await sortKey.sort(models , order: order)
         }
-        searchProducer = { models , query , strategy in
-            let key = SearchableKeyPath(key: key , stringifier: stringer)
-            
+        searchProducer = { models , query,strategy in
+            let key = SearchableKeyPath( key , stringifier: stringer)
+
             return await key.search(in: models, for: query,strategy: strategy)
-            
-        }
-        partialKey = key as PartialKeyPath<Root>
-        
-        self.order = sortOrder
-        let searchableKey = SearchableKeyPath(key: key)
-        anySearchableKey = AnySearchableKey(searchableKey)
-        let sortable = SortableKeyPath(key)
-        anySortableKey = AnySortableKey(sortable, order: sortOrder)
-    }
-    init<T : Comparable,Stringer: Stringifier>(_ key : KeyPath<Root , T>,sortOrder : SortOrder , stringer : Stringer ) where Stringer.Model == T {
-        self.stringProducer = { model in
-            return stringer.stringify(model[keyPath: key])
-        }
-        
-        sorterProducer = { models , order in
-            let sortKey = SortableKeyPath(key)
-            return await sortKey.sort(models , order: order)
-        }
-        searchProducer = { models , query, strategy in
-            let key = SearchableKeyPath(key: key , stringifier: stringer)
-            
-            return await key.search(in: models, for: query,strategy: strategy)
-            
+
         }
         partialKey = key as PartialKeyPath<Root>
 
         self.order = sortOrder
-        
-        let searchableKey = SearchableKeyPath(key: key , stringifier: stringer)
+        let searchableKey = SearchableKeyPath( key)
         anySearchableKey = AnySearchableKey(searchableKey)
-        let sortable = SortableKeyPath(key)
-        anySortableKey = AnySortableKey(sortable, order: sortOrder)
+        let sortable = SortableKeyPath(key, order: order)
+        anySortableKey = AnySortableKey(sortable)
     }
 
 }
+
+public extension AnyKey {
+    init<SearchKey : Comparable , Searchable : SearchableKeyProtocol>(_ key : Searchable, sortOrder : SortOrder) where Searchable.Item == Root , Searchable.Key == SearchKey , Searchable.Stringer.Model == SearchKey{
+        
+        let stringer = key.stringer
+        self.stringProducer = { model in
+            return stringer.stringify(model[keyPath: key.key])
+        }
+        
+        sorterProducer = { models , order in
+            let sortKey = SortableKeyPath(key.key, order: order)
+            return await sortKey.sort(models , order: order)
+        }
+        searchProducer = { models , query,strategy in
+            let key = key
+            
+            return await key.search(in: models, for: query,strategy: strategy)
+            
+        }
+        partialKey = key.key as PartialKeyPath<Root>
+        
+        self.order = sortOrder
+        let searchableKey = key //SearchableKeyPath( key,stringifier: stringer)
+        anySearchableKey = AnySearchableKey(searchableKey)
+        
+        anySortableKey = AnySortableKey(key.key,order: sortOrder)
+    }
+}
+
+
+public extension AnyKey {
+    init<SortKey : Comparable,Stringer : Stringifier , Sortable : SortableKeyPathProtocol>(_ key : Sortable , stringer : Stringer ) where SortKey == Stringer.Model , Sortable.Key == SortKey , Sortable.Model == Root {
+        
+        self.stringProducer = { model in
+            return stringer.stringify(model[keyPath: key.key])
+        }
+        
+        sorterProducer = { models , order in
+            let sortKey = SortableKeyPath(key.key, order: order)
+            return await sortKey.sort(models , order: order)
+        }
+        searchProducer = { models , query,strategy in
+            let key = SearchableKeyPath( key , stringifier: stringer)
+            
+            return await key.search(in: models, for: query,strategy: strategy)
+            
+        }
+        partialKey = key.key as PartialKeyPath<Root>
+        
+        self.order = key.order
+        let searchableKey = SearchableKeyPath( key,stringifier: stringer)
+        anySearchableKey = AnySearchableKey(searchableKey)
+        
+        anySortableKey = AnySortableKey(key)
+    }
+}
+
+///Initilize from SortableKeyPath
+public extension AnyKey  {
+    init<SortKey : Comparable, Sortable : SortableKeyPathProtocol>(_ key : Sortable) where SortKey: CustomStringConvertible , Sortable.Model == Root , Sortable.Key == SortKey {
+        let stringer = StringConvertableStringifier<SortKey>()
+        self.stringProducer = { model in
+            return stringer.stringify(model[keyPath: key.key])
+        }
+        
+        sorterProducer = { models , order in
+            let sortKey = SortableKeyPath(key.key, order: order)
+            return await sortKey.sort(models , order: order)
+        }
+        searchProducer = { models , query,strategy in
+            let key = SearchableKeyPath( key , stringifier: stringer)
+            
+            return await key.search(in: models, for: query,strategy: strategy)
+            
+        }
+        partialKey = key.key as PartialKeyPath<Root>
+        
+        self.order = key.order
+        let searchableKey = SearchableKeyPath( key,stringifier: stringer)
+        anySearchableKey = AnySearchableKey(searchableKey)
+        
+        anySortableKey = AnySortableKey(key)
+    }
+
+}
+
+public extension AnyKey {
+    ///Initiates a key from a TitledKey
+    init <Key: CustomStringConvertible, Stringer : Stringifier> (_ key : TitledKey<Root,Key,Stringer>, sortOrder : SortOrder) where Key : Comparable , Stringer.Model == Key {
+        let stringer = key.stringer
+        self.stringProducer = { model in
+            return stringer.stringify(model[keyPath: key.key])
+        }
+        
+        sorterProducer = { models , order in
+            let sortKey = SortableKeyPath(key.key, order: order)
+            return await sortKey.sort(models , order: order)
+        }
+        
+        searchProducer = { models , query,strategy in
+            //let key = SearchableKeyPath( key , stringifier: stringer)
+            
+            return await key.search(in: models, for: query,strategy: strategy)
+            
+        }
+        partialKey = key.key as PartialKeyPath<Root>
+        
+        self.order = sortOrder
+        let searchableKey = SearchableKeyPath( key.key,stringifier: stringer)
+        anySearchableKey = AnySearchableKey(searchableKey)
+        
+        anySortableKey = AnySortableKey(key.key, order: sortOrder)
+    }
+}
+
+

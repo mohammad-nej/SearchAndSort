@@ -13,35 +13,24 @@ import Foundation
 public struct AnySortableKey<Model : Sendable> : Sendable{
     
     typealias Value = Comparable
-    private let closure : @Sendable ([Model],SortOrder?) async -> [Model]
+    private let closure : @Sendable ([Model],SortOrder) async -> [Model]
     
     public let order : SortOrder
     
     
     
-    
-    public init<T:Comparable>(_ item : SortableKeyPath<Model,T> , order : SortOrder ) {
-        self.order = order
-        closure = { models , order in
-            models.sorted { first, second in
-                let value1 = item.value(for: first)
-                let value2 = item.value(for: second)
-                
-                if order == .ascending{
-                    return value1 < value2
-                }else{
-                    return value1 > value2
-                }
-            }
-        }
+    public init<T:Comparable, Sortable : SortableKeyPathProtocol>(_ item : Sortable) where Sortable.Key == T , Sortable.Model == Model{
         
+        closure = { models , order in
+            await item.sort(models, order: order)
+        }
+        order = item.order
     }
     
     public func sorted(_ models : [Model] , order : SortOrder? = nil) async -> [Model] {
         let sortOrder = order == nil ? self.order : order
-        return await Task.detached {
-            return await closure(models, sortOrder)
-         }.value
+        return await closure(models, sortOrder!)
+         
     }
     
 }
@@ -49,35 +38,19 @@ public struct AnySortableKey<Model : Sendable> : Sendable{
 public extension AnySortableKey {
     init<Key:Comparable , Stringer>(_ item : TitledKey<Model, Key, Stringer>, order : SortOrder){
         
-        self.order = order
-        let key = SortableKeyPath(item.key)
+        
+        
         self.closure = { models, order in
-            models.sorted { first, second in
-                let value1 = key.value(for: first)
-                let value2 = key.value(for: second)
-                if order == .ascending{
-                    return value1 < value2
-                }else{
-                    return value1 > value2
-                }
-            }
 
+            await item.sort(models, order: order)
         }
+        self.order = order
     }
     init<Key: Comparable>(_ key : KeyPath<Model , Key>, order : SortOrder){
         self.order = order
-        let key = SortableKeyPath(key)
+        let key = SortableKeyPath(key, order: order)
         self.closure = { models, order in
-            models.sorted { first, second in
-                let value1 = key.value(for: first)
-                let value2 = key.value(for: second)
-                if order == .ascending{
-                    return value1 < value2
-                }else{
-                    return value1 > value2
-                }
-            }
-
+            await key.sort(models, order: order)
         }
 
     }

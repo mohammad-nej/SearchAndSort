@@ -45,13 +45,26 @@ public extension TitledKey where Key : Comparable {
         self.title = title
         self.key = key.key
         self.stringer = stringifier
+        
+    }
+  
+}
+public extension TitledKey where Key : CustomStringConvertible, Key : Comparable , Stringified == StringConvertableStringifier<Key> {
+    
+    
+    init<S : SortableKeyPathProtocol>(title: String , key : S) where S.Key == Key , S.Key : CustomStringConvertible , S.Model == Model , Stringified.Model == S.Key{
+        self.title = title
+        self.key = key.key
+        self.stringer = StringConvertableStringifier<Key>()
+        
     }
 }
 public extension TitledKey where Key : Comparable {
     
     func sort(_ items : [Model] , order : SortOrder) async -> [Model] {
-        let sortable = SortableKeyPath(self.key)
-        return await AnySortableKey(sortable,order: order).sorted(items)
+        let sortable = SortableKeyPath(self.key, order: order)
+        
+        return await sortable.sort(items)
     }
 }
 public extension TitledKey {
@@ -60,3 +73,12 @@ public extension TitledKey {
         return await searcher.search(query)
     }
 }
+public extension TitledKey where Key : CustomStringConvertible, Stringified == StringConvertableStringifier<Key> {
+    init (title: String , key : KeyPath<Model, Key> ){
+        self.title = title
+        self.key = key
+        self.stringer = StringConvertableStringifier<Key>()
+    }
+    
+}
+

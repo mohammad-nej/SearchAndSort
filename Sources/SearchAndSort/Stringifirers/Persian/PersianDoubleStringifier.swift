@@ -8,8 +8,7 @@ import Foundation
 public struct PersianDoubleStringifier : Stringifier , Sendable {
     static let persian : PersianDoubleStringifier = .init() 
     public func stringify(_ model: Double) -> [String] {
-        var results : [String] = DoubleStringifier().stringify(model)
-        
+        var results : [String] = [model.description , model.formatted()]
         let formatter = NumberFormatter()
         formatter.locale = .init(identifier: "fa_IR")
         formatter.numberStyle = .decimal

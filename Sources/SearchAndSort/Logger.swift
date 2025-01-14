@@ -4,7 +4,8 @@
 //
 //  Created by MohammavDev on 1/9/25.
 //
-import OSLog
+import MyLogger
 
 
-let logger = Logger(subsystem: "SearchAndSort", category: "SearchAndSort")
+let logger = Logger(subsystem: "SearchAndSort", category: "SearchAndSort",enabled: false)
+

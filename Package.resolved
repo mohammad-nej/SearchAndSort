@@ -1,0 +1,15 @@
+{
+  "originHash" : "926639cf9c132798d8ff3271b707132c35f0cc0656c89a4e6d47ab596c7b1351",
+  "pins" : [
+    {
+      "identity" : "mylogger",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/mohammad-nej/MyLogger",
+      "state" : {
+        "revision" : "59ac09790a90bd6f3f365418867774eb97a6805a",
+        "version" : "1.0.2"
+      }
+    }
+  ],
+  "version" : 3
+}

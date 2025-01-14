@@ -46,7 +46,7 @@ if you want to be able to sort based on multiple `Key`s you can use `AnySortable
 ```swift
 let nameKey = SortableKeyPath(\Student.name)
 let ageKey = SortableKeyPath(\Student.age)
-let keys : [AnySortableKey] = [.init(nameKey,order: .ascending), .init(ageKey,order: .descending)]
+let keys : [AnySortableKey] = [.init(nameKey), .init(ageKey)]
 ```
 **Note:** this will only erase `Key`s type, thus you can't store `SortableKeyPath`s of different models in the same array.
 
@@ -76,15 +76,15 @@ assuming that we want to implement this protocol for `Int` type :
 this way when `BackgroundSearcher` is iterating over your models, it will converted every `Int` to an **array of strings** and match it with your search query.
 for example with this `IntStringifier` your user will get a match for 2000 either if he enters "2000" or "2,000" as query.
 
-**Good news:** this package already implemnted `Stringifier` for `Date`,`Int`,`String`,`Double`,`Bool` and they are passed as default values thus you don't need to worry about that.
+**Good news:** Any type that confroms to `CustomStringConvertibale` protocol will automaticly receive a `Stringifier` which will return its `description`.
 
 ### Creating SearchableKey:
 
 with that being said lets create `SearchableKey`:
 ```swift
- let nameKey = SearchableKeyPath(key:\Student.name)
- let ageKey = SearchableKeyPath(key:\Student.age)
- let dateKey = SearchableKeyPath(key: \Student.birthDate, stringifier: MyOwnStringifier())
+ let nameKey = SearchableKeyPath(\Student.name)
+ let ageKey = SearchableKeyPath(\Student.age)
+ let dateKey = SearchableKeyPath( \Student.birthDate, stringifier: MyOwnStringifier())
 ```
 we can now search on any array of type `Student` using these keys:
 ```swift
@@ -118,18 +118,30 @@ just like `BackgroundSearcher`, `Sorter` will let you store all your models and 
 ```swift
 let nameSort = SortableKeyPath(\Student.name)
 let ageSort = SortableKeyPath(\Student.age)
-let sorter = Sorter(models: students, keys: [.init(nameSort), order: .init(ageSort))
+let sorter = Sorter(models: students, keys: [.init(nameSort),.init(ageSort))
 ```
 **Note:** unlike `BackgroundSearcher`, `Sorter` will always create 1 `Task` regardless of the size of your array.
 
 ## TitledKey
 this type can be used to provide a title for your keys ( e.g. you want to show it in the UI).
 ```swift
-let titledNameKey = TitledKey(title: "Name", key: \Student.name, stringer: .default)
+let titledNameKey = TitledKey(title: "Name", key: \Student.name)
 ```
 this type can be replaced by `SearchableKeyPath` and you can also use it in place of a `SortableKeyPath` if the `Key` that you are providing conforms to `Comparable` protocol.
 
 so it can be used as an input to `BackgroundSearcher` , `AnySearchableKey` and `Sorter` , `AnySortableKey` ( if the key is `Comparable`). the only downside to use this type is that if you only want to do sort, you always have to provide `Stringifier` for your `Key` type.
+
+## AnyKey
+this type is also a type erasure that can contain `SortableKey`,`SearchableKey`,`TitledKey` , or it can even be created directly from `KeyPath`.
+```swift
+        let sortableKey = SortableKeyPath(\Student.name, order: .ascending)
+        let birthDayKey = SearchableKeyPath(\Student.birthDate,stringifier: .persian)
+        let nameKey = TitledKey(title: "Name", key: \Student.name)
+        
+        let anykey = AnyKey(birthDayKey,sortOrder: .ascending)
+        let anyKey2 = AnyKey(nameKey,sortOrder:.ascending)
+        let anyKey3 = AnyKey(sortableKey) 
+```
 
 ## Type Safety
 This package is completely **Type Safe** and you can't go wrong without getting compile time error. it also based on **Swift 6** so it's completely concurrency safe.

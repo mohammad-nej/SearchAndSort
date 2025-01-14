@@ -254,7 +254,7 @@ public final actor BackgroundSearcher<T : Sendable>  {
         }
         tasks.append(task)
         let result = await task.value
-        logger.log("Task is finished...")
+        //logger.log("Task is finished...")
         tasks.removeAll { element in
             element == task
         }

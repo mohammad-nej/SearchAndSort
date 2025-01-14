@@ -11,6 +11,10 @@ import Foundation
 
 public struct SortableKeyPath<M : Sendable,K : Comparable> : SortableKeyPathProtocol, Sendable{
     
+        
+    public var order: SortOrder
+    
+    
     public typealias Model = M
     
     public typealias Key = K
@@ -22,14 +26,9 @@ public struct SortableKeyPath<M : Sendable,K : Comparable> : SortableKeyPathProt
     
    
     
-    public init(_ key: KeyPath<Model,Key> ) {
+    public init(_ key: KeyPath<Model,Key> , order : SortOrder ) {
         self.key = key
+        self.order = order
     }
 }
 
-
-public extension SortableKeyPath {
-    func sort(_ model : [M] , order : SortOrder) async-> [M] {
-        return await AnySortableKey(self, order: order).sorted(model)
-    }
-}

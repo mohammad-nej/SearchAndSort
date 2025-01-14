@@ -10,7 +10,7 @@ import Foundation
 public struct PersianIntStringifier : Stringifier, Sendable {
     
     public func stringify(_ model: Int) -> [String] {
-        var results = IntStringifier().stringify(model)
+        var results = [model.formatted(),model.description]
         
         let formatter = NumberFormatter()
         formatter.locale = .init(identifier: "fa_IR")

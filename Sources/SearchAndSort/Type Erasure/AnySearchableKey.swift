@@ -14,9 +14,9 @@ public struct AnySearchableKey<Root : Sendable> : Sendable{
         }
         partialKey = item.key as PartialKeyPath<Root>
         searchProducer = { models , query , strategy in
-            let key = SearchableKeyPath(key: item.key , stringifier: item.stringer)
+            //let key = SearchableKeyPath(item.key , stringifier: item.stringer)
             
-            return await key.search(in: models, for: query,strategy: strategy)
+            return await item.search(in: models, for: query,strategy: strategy)
             
         }
     }
@@ -34,85 +34,21 @@ public struct AnySearchableKey<Root : Sendable> : Sendable{
     }
     
 }
+
 public extension AnySearchableKey {
-    
-    init<Stringer : Stringifier> (_ key : KeyPath<Root, String> , stringer : Stringer = .default ) where Stringer.Model == String {
-        
+    init<Key:CustomStringConvertible> (_ key : KeyPath<Root, Key>){
+        let stringer = StringConvertableStringifier<Key>()
         self.stringProducer = { model in
             return stringer.stringify( model[keyPath: key])
         }
         self.partialKey = key
         searchProducer = { models , query,strategy in
-            let key = SearchableKeyPath(key: key , stringifier: stringer)
+            let key = SearchableKeyPath(key , stringifier: stringer)
             
             return await key.search(in: models, for: query,strategy: strategy)
             
         }
     }
-    
-    init<Stringer : Stringifier> (_ key : KeyPath<Root, Int> , stringer : Stringer = .default ) where Stringer.Model == Int {
-        
-        self.stringProducer = { model in
-            return stringer.stringify( model[keyPath: key])
-        }
-        self.partialKey = key
-        searchProducer = { models , query,strategy in
-            let key = SearchableKeyPath(key: key , stringifier: stringer)
-            
-            return await key.search(in: models, for: query,strategy: strategy)
-            
-        }
-    }
-    init<Stringer : Stringifier> (_ key : KeyPath<Root, Double> , stringer : Stringer = .default ) where Stringer.Model == Double {
-        
-        self.stringProducer = { model in
-            return stringer.stringify( model[keyPath: key])
-        }
-        self.partialKey = key
-        searchProducer = { models , query,strategy in
-            let key = SearchableKeyPath(key: key , stringifier: stringer)
-            
-            return await key.search(in: models, for: query,strategy: strategy)
-            
-        }
-    }
-    init<Stringer : Stringifier> (_ key : KeyPath<Root, Date> , stringer : Stringer = .default ) where Stringer.Model == Date {
-        
-        self.stringProducer = { model in
-            return stringer.stringify( model[keyPath: key])
-        }
-        self.partialKey = key
-        searchProducer = { models , query,strategy in
-            let key = SearchableKeyPath(key: key , stringifier: stringer)
-            
-            return await key.search(in: models, for: query,strategy: strategy)
-            
-        }
-    }
-    init<Stringer : Stringifier> (_ key : KeyPath<Root, Bool> , stringer : Stringer = .default ) where Stringer.Model == Bool {
-        
-        self.stringProducer = { model in
-            return stringer.stringify( model[keyPath: key])
-        }
-        self.partialKey = key
-        searchProducer = { models , query,strategy in
-            let key = SearchableKeyPath(key: key , stringifier: stringer)
-            
-            return await key.search(in: models, for: query,strategy: strategy)
-            
-        }
-    }
-    init<Stringer : Stringifier , T> (_ key : KeyPath<Root, T> , stringer : Stringer  ) where Stringer.Model == T {
-        
-        self.stringProducer = { model in
-            return stringer.stringify( model[keyPath: key])
-        }
-        self.partialKey = key
-        searchProducer = { models , query,strategy in
-            let key = SearchableKeyPath(key: key , stringifier: stringer)
-            
-            return await key.search(in: models, for: query,strategy: strategy)
-            
-        }
-    }
+
 }
+

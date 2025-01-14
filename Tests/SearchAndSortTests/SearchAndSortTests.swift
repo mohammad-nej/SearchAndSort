@@ -2,8 +2,9 @@ import Testing
 import Foundation
 @testable import SearchAndSort
 
-struct Family : Sendable{
+struct Family : Sendable , CustomStringConvertible{
     let name  : String
+    var description: String { return name }
 }
 struct Numbered : Sendable {
     let number : Int
@@ -35,8 +36,8 @@ struct Tests {
     let ali = Student(name: "Ali", age: 12, grade: 12.4, birthDate: Date(), family: .init(name: "something"))
     
     
-    let key = TitledKey(title: "Grade", key: \Student.grade, stringifier: .default)
-    let key2 = TitledKey(title: "Name", key: \Student.name , stringifier: .default )
+    let key = TitledKey(title: "Grade", key: \Student.grade)
+    let key2 = TitledKey(title: "Name", key: \Student.name)
    
     @Test func TypeErasureTest() async throws {
         
@@ -53,13 +54,13 @@ struct Tests {
         
         let studensts = [hamid,ali]
             
-        let searchableName = SearchableKeyPath(key: \Student.family, stringifier: FamilyStringifier())
-        let namePath = SortableKeyPath(\Student.name)
+        let searchableName = SearchableKeyPath(\Student.family, stringifier: FamilyStringifier())
+        let namePath = SortableKeyPath(\Student.name, order: .ascending)
         
-        let ageKeyPath = SortableKeyPath(\Student.age)
+        let ageKeyPath = SortableKeyPath(\Student.age, order: .descending)
         //let ageKeyPath = SortableTitledKeyPath(title: "Age", key: \Student.age)
         
-        let titledKey = TitledKey(title: "Name", key: namePath , stringifier: .default )
+        let titledKey = TitledKey(title: "Name", key: namePath )
         
         let searcher = BackgroundSearcher(models: studensts, keys: [.init(titledKey)])
         
@@ -72,9 +73,9 @@ struct Tests {
         //let errorSorter = AnySorter(familyKey,order: .init(from: .ascending))
         
                 
-         let sortedByAge = await AnySortableKey(ageKeyPath, order: .ascending).sorted(studensts)
-        #expect(studensts[1] == sortedByAge[0])
-        #expect(studensts[0] == sortedByAge[1])
+        let sortedByAge = await AnySortableKey(ageKeyPath).sorted(studensts)
+        #expect(studensts[1] == sortedByAge[1])
+        #expect(studensts[0] == sortedByAge[0])
         
         //These 2 defenitions provide the same result
         let sortedByName = await titledKey.sort(studensts, order: .descending)
@@ -107,6 +108,25 @@ struct Tests {
         
         
     }
+    func myTests () async throws {
+        let key = AnySearchableKey(\Student.family)
+        
+        let ket3 = AnyKey(\Student.name, sortOrder: .ascending)
+        
+        let key5 = AnyKey(\Student.grade, sortOrder: .descending)
+        //let sortableKey = SortableKeyPath(\Student.name, order: .ascending)
+        
+        //let anySortable = AnySortableKey(sortableKey)
+        
+        let sortableKey = SortableKeyPath(\Student.name, order: .ascending)
+        let birthDayKey = SearchableKeyPath(\Student.birthDate,stringifier: .persian)
+        let nameKey = TitledKey(title: "Name", key: \Student.name)
+        
+        let anykey = AnyKey(birthDayKey,sortOrder: .ascending)
+        let anyKey2 = AnyKey(nameKey,sortOrder:.ascending)
+        let anyKey3 = AnyKey(sortableKey)
+        
+    }
     @Test func sortTest() async throws {
         let studnets : [Student] = [
             .init(name: "John", age: 20, grade: 12.5, birthDate: .now ,family:.init(name: "Potter")),
@@ -118,11 +138,11 @@ struct Tests {
         ]
         
         let grade = TitledKey(title: "Grade", key: \Student.grade)
-        let nameKey = SortableKeyPath(\Student.name)
+        let nameKey = SortableKeyPath(\Student.name, order: .descending)
         //let sortedArray = nameKey.sort(students, order: .ascending)
         let sortedArray = await grade.sort(studnets, order: .descending)
         
-        let keys : [AnySortableKey] = [.init(grade,order: .descending) , .init(nameKey, order: .descending)]
+        let keys : [AnySortableKey] = [.init(grade,order: .descending) , .init(nameKey)]
         
         #expect(sortedArray[0].grade == 17.5)
         #expect(sortedArray.last!.grade == 12.5)
@@ -138,8 +158,8 @@ struct Tests {
             .init(name: "John", age: 24, grade: 16.5, birthDate: .now ,family:.init(name: "Potter")),
             .init(name: "Jane", age:25, grade: 17.5, birthDate: .now ,family:.init(name: "Potter"))
         ]
-        let nameKey = SearchableKeyPath(key:\Student.name)
-        let ageKey = SearchableKeyPath(key:\Student.age)
+        let nameKey = SearchableKeyPath(\Student.family)
+        let ageKey = SearchableKeyPath(\Student.age)
         
         let anyNamekey = AnyKey(\Student.name, sortOrder: .ascending)
         
@@ -163,7 +183,8 @@ struct Tests {
         }
         
         
-        let arrayKey = TitledKey(title: "Big Array", key: \Int.self, stringifier: .default)
+        let arrayKey = TitledKey(title: "Big Array", key: \Int.self)
+        
         
         let searcher = BackgroundSearcher(models: bigArray , keys: [.init(arrayKey)])
         
@@ -187,7 +208,7 @@ struct Tests {
         }
         
         
-        let arrayKey = TitledKey(title: "Big Array", key: \Int.self, stringifier: .default)
+        let arrayKey = TitledKey(title: "Big Array", key: \Int.self)
         
         let searcher = BackgroundSearcher(models: bigArray , keys: [.init(arrayKey)])
         
@@ -221,7 +242,7 @@ struct Tests {
         
         
         
-        let arrayKey = TitledKey(title: "Big Array", key: \Int.self, stringifier: .default)
+        let arrayKey = TitledKey(title: "Big Array", key: \Int.self)
         
         let searcher = BackgroundSearcher(models: bigArray , keys: [.init(arrayKey)])
         
