@@ -68,6 +68,18 @@ public extension AnySearchableKey {
             
         }
     }
-
+    init(_ key : AnyKey<Root>) {
+        self.partialKey = key.partialKey
+        self.stringProducer = { model in
+            return key.stringify(model)
+        }
+        self.searchProducer = {model , query , strategy in
+                await key.search(in: model, for: query,strategy: strategy)
+        }
+    }
 }
-
+extension AnySearchableKey : Hashable {
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+    }
+}

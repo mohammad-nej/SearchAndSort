@@ -10,6 +10,8 @@ struct Numbered : Sendable {
     let number : Int
 }
 struct FamilyStringifier : Stringifier {
+    var id: UUID = UUID()
+    
     typealias Model = Family
     func stringify(_ value: Family) -> [String] {
         return [value.name]
@@ -134,6 +136,11 @@ struct Tests {
         
         let nameKey = TitledKey(title: "Name", key: \Student.name)
         let ageKey = TitledKey(title: "Age", key: \Student.age)
+        
+        let anyTitledKey  = AnySortableTitledKey(\Student.name, title: "Name")
+        let anySortableTitledKey = AnySearchableTitledKey(\Student.name, title: "Family")
+        
+        let anyTitledKeys : [AnyTitledKey<Student>] = [.init(nameKey),.init(ageKey)]
         
         let backSearcher = BackgroundSearcher(models: students, keys: [.init(nameKey),.init(ageKey)])
         

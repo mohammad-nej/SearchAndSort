@@ -42,3 +42,8 @@ extension SearchableKeyPath : Sortable where Key : Comparable  {
     
     
 }
+extension SearchableKeyPath : Hashable {
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+    }
+}

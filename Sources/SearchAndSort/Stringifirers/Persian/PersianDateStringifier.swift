@@ -28,3 +28,4 @@ public struct PersianDateStringifier : Stringifier , Sendable {
 public extension Stringifier where Self == PersianDateStringifier {
     static var persian : Self { .init()}
 }
+

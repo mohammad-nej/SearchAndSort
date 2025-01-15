@@ -29,7 +29,7 @@ public struct TitledKey<Model : Sendable ,Key , Stringified : Stringifier> : Sea
     
     public var stringer: Stringified
     public var title: String
-    public var key : KeyPath<Model, Key> 
+    public var key : KeyPath<Model, Key>
     
     public init( title: String, key: KeyPath<Model, Key>,stringer: Stringified) {
         self.stringer = stringer
@@ -37,9 +37,9 @@ public struct TitledKey<Model : Sendable ,Key , Stringified : Stringifier> : Sea
         self.key = key
     }
     
-    public func stringify(_ item : Model) -> [String] {
-        return stringer.stringify(item[keyPath: key])
-    }
+//    public func stringify(_ item : Model) -> [String] {
+//        return stringer.stringify(item[keyPath: key])
+//    }
 }
 
 
@@ -85,4 +85,7 @@ public extension TitledKey where Key : CustomStringConvertible, Stringified == S
     }
     
 }
+
+
+
 

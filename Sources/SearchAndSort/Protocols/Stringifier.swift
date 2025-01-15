@@ -9,7 +9,7 @@
 import Foundation
 import Foundation
 
-public protocol Stringifier : Sendable , Identifiable , Equatable {
+public protocol Stringifier : Sendable , Identifiable , Equatable , Hashable {
     
     associatedtype Model 
     

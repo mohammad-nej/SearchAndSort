@@ -126,7 +126,7 @@ public extension AnyKey {
         partialKey = key.key as PartialKeyPath<Root>
         
         
-        let searchableKey = SearchableKeyPath( key,stringifier: stringer)
+        
         
     }
 }
@@ -152,7 +152,7 @@ public extension AnyKey  {
         partialKey = key.key as PartialKeyPath<Root>
         
         
-        let searchableKey = SearchableKeyPath( key,stringifier: stringer)
+        
       
     }
 
@@ -180,8 +180,13 @@ public extension AnyKey {
         partialKey = key.key as PartialKeyPath<Root>
         
         
-        let searchableKey = SearchableKeyPath( key.key,stringifier: stringer)
+        
     }
 }
 
 
+extension AnyKey : Hashable {
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+    }
+}

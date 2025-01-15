@@ -9,8 +9,7 @@
 import Foundation
 import Foundation
 
-public protocol SearchableKeyProtocol : ValuePresentable, Searchable ,Sendable
-,Identifiable,Equatable
+public protocol SearchableKeyProtocol : ValuePresentable, Searchable ,Sendable,Identifiable,Equatable
 where  Stringer.Model == Key, Value == Key   {
     associatedtype Item : Sendable
     associatedtype Key

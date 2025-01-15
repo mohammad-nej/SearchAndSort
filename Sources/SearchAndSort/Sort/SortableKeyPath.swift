@@ -33,4 +33,8 @@ public struct SortableKeyPath<M : Sendable,K : Comparable> : SortableKeyPathProt
         
     }
 }
-
+extension SortableKeyPath : Hashable {
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+    }
+}

@@ -52,4 +52,14 @@ public extension AnySortableKey {
         }
 
     }
+     init(_ key : AnyKey<Model>){
+        self.closure = { models, order in
+            await key.sort(models, order: order)
+        }
+    }
+}
+extension AnySortableKey : Hashable {
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+    }
 }
