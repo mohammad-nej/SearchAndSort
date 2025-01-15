@@ -7,7 +7,7 @@
 
 public struct AnySearchableTitledKey<Model : Sendable> : Sendable , Searchable {
 
-    let title : String
+    public let title : String
     public let key : PartialKeyPath<Model>
     
     
