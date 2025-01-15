@@ -57,6 +57,7 @@ public extension AnySortableKey {
             await key.sort(models, order: order)
         }
     }
+
 }
 extension AnySortableKey : Hashable {
     public func hash(into hasher: inout Hasher) {

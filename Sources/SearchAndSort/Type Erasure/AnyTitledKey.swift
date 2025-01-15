@@ -5,12 +5,20 @@
 //  Created by MohammavDev on 1/15/25.
 //
 import Foundation
+
+
+///Type erasre that let you store TitledKeys with same Model type in an array. Your Key type should confrom to Comparable
 public struct AnyTitledKey<Model : Sendable> : Searchable , Sortable ,Identifiable   {
     public var id: UUID = UUID()
     public var title: String
     
     private let searchFunc : @Sendable ( [Model] , String , SearchStrategy ) async -> [Model]?
     private let sortFunc : @Sendable ([Model] , SortOrder ) async-> [Model]
+    private let stringifyFunc : @Sendable ( Model ) -> [String]
+    
+    public func stringify(_ model: Model) -> [String] {
+        return stringifyFunc(model)
+    }
     
     public init<Key: Comparable,Stringered:Stringifier>(_ key : TitledKey<Model,Key,Stringered>) {
         
@@ -21,6 +29,9 @@ public struct AnyTitledKey<Model : Sendable> : Searchable , Sortable ,Identifiab
         }
         self.sortFunc = { models , order in
             await key.sort(models, order: order)
+        }
+        self.stringifyFunc = { model in
+            key.stringify(model)
         }
     }
     
@@ -55,6 +66,11 @@ public extension AnyTitledKey {
         self.sortFunc = { model , order in
             await TitledKey.sort( model, order: order)
         }
+        
+        self.stringifyFunc = { model in
+            TitledKey.stringify(model)
+        }
+        
         self.title = title
     }
     init<Key:Comparable>(_ keyPath : KeyPath<Model,Key>,title:String) where Key:CustomStringConvertible {
@@ -67,6 +83,10 @@ public extension AnyTitledKey {
         self.sortFunc = { model , order in
             await TitledKey.sort( model, order: order)
         }
+        
+        self.stringifyFunc = { model in
+            TitledKey.stringify(model)
+        }
         self.title = title
     }
     init(_ key : AnyKey<Model>, title : String){
@@ -76,6 +96,9 @@ public extension AnyTitledKey {
         }
         self.sortFunc = { model , order in
             await key.sort( model, order: order)
+        }
+        self.stringifyFunc = { model in
+            key.stringify(model)
         }
     }
     

@@ -189,11 +189,12 @@ struct Tests {
         let nameKey = SearchableKeyPath(\Student.family)
         let ageKey = SearchableKeyPath(\Student.age)
         
+        let searchable = AnyKey(\Student.family,stringer: FamilyStringifier())
         let anyNamekey = AnyKey(\Student.name)
         
         let name = AnySearchableKey(\Student.name)
         let age = AnySortableKey(\Student.name)//.sorted(<#T##models: [_]##[_]#>, order: <#T##SortOrder?#>)
-        BackgroundSearcher(models: studnets, keys: [.init(\Student.name)])
+//        BackgroundSearcher(models: studnets, keys: [.init(nameKey), .init(, stringer: <#T##Stringifier#>)])
         let searchResult = await ageKey.search(in:studnets , for: "Sara", strategy: .contains)
         
         #expect(searchResult == [])

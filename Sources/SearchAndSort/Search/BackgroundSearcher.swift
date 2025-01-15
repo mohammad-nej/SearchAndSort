@@ -62,13 +62,20 @@ public final actor BackgroundSearcher<T : Sendable>  {
 
     
     public init(models : [T]  , keys : [AnySearchableKey<T>]  ,strategy: SearchStrategy = .contains ,useWildCards : Bool = true){
-        
-        _allModels = models
-        self.keys = keys.map{ AnySearchableTitledKey($0,title:"")}
-        self.useWildCards = useWildCards
-        self.searchStrategy = strategy
-    }
-    
+       
+       _allModels = models
+       self.keys = keys.map{ AnySearchableTitledKey($0,title:"Not Provided")}
+       self.useWildCards = useWildCards
+       self.searchStrategy = strategy
+   }
+    public init(models : [T]  , keys : [AnyKey<T>]  ,strategy: SearchStrategy = .contains ,useWildCards : Bool = true){
+       
+       _allModels = models
+       self.keys = keys.map{ AnySearchableTitledKey($0,title:"Not Provided")}
+       self.useWildCards = useWildCards
+       self.searchStrategy = strategy
+   }
+
     
     
     private func multiThreadSearch(_ query : String , withKeys key : [AnySearchableTitledKey<T>]? = nil) async  -> [T]? {

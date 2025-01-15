@@ -11,16 +11,14 @@ public struct AnySearchableKey<Root : Sendable> : Sendable, Searchable , Identif
     
     private let stringProducer :  @Sendable (Root) -> [String]
     private let searchProducer : @Sendable ([Root], String, SearchStrategy) async -> [Root]?
-    public let partialKey : PartialKeyPath<Root>
+    
     
     public init<T : SearchableKeyProtocol>(_ item : T) where T.Item == Root  {
         self.stringProducer = { model in
             return item.stringify(model)
         }
-        partialKey = item.key as PartialKeyPath<Root>
+        
         searchProducer = { models , query , strategy in
-            //let key = SearchableKeyPath(item.key , stringifier: item.stringer)
-            
             return await item.search(in: models, for: query,strategy: strategy)
             
         }
@@ -46,7 +44,7 @@ public extension AnySearchableKey {
         self.stringProducer = { model in
             return stringer.stringify( model[keyPath: key])
         }
-        self.partialKey = key
+        
         searchProducer = { models , query,strategy in
             let key = SearchableKeyPath(key , stringifier: stringer)
             
@@ -60,7 +58,7 @@ public extension AnySearchableKey {
         self.stringProducer = { model in
             return stringer.stringify( model[keyPath: key])
         }
-        self.partialKey = key
+        
         searchProducer = { models , query,strategy in
             let key = SearchableKeyPath(key , stringifier: stringer)
             
@@ -69,12 +67,28 @@ public extension AnySearchableKey {
         }
     }
     init(_ key : AnyKey<Root>) {
-        self.partialKey = key.partialKey
+        
         self.stringProducer = { model in
             return key.stringify(model)
         }
         self.searchProducer = {model , query , strategy in
                 await key.search(in: model, for: query,strategy: strategy)
+        }
+    }
+    init(_ key : AnyTitledKey<Root>){
+        self.stringProducer = { model in
+            key.stringify(model)
+        }
+        self.searchProducer = { model , query , strategy in
+            await key.search(in: model, for: query,strategy: strategy)
+        }
+    }
+    init(_ key : AnySearchableTitledKey<Root>){
+        self.stringProducer = { model in
+            key.stringify(model)
+        }
+        self.searchProducer = { model , query , strategy in
+            await key.search(in: model, for: query,strategy: strategy)
         }
     }
 }

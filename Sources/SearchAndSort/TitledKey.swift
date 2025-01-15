@@ -9,6 +9,8 @@
 import Foundation
 import Foundation
 
+
+///A type to store your Keys and a title string attached to it. You can use it to Search over your models. You can also use it to Sort if your Key confroms to Comparable
 public struct TitledKey<Model : Sendable ,Key , Stringified : Stringifier> : SearchableKeyProtocol , Sendable , Identifiable,Equatable where Stringified.Model == Key {
     
     public let id : UUID = UUID()
@@ -36,10 +38,7 @@ public struct TitledKey<Model : Sendable ,Key , Stringified : Stringifier> : Sea
         self.title = title
         self.key = key
     }
-    
-//    public func stringify(_ item : Model) -> [String] {
-//        return stringer.stringify(item[keyPath: key])
-//    }
+
 }
 
 

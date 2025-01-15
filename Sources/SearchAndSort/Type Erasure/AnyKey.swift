@@ -7,6 +7,8 @@
 
 import Foundation
 
+
+///Type erasure that  can be used for Searching and Sorting, your Key should conform to Comparable 
 public struct AnyKey<Root : Sendable> : Sendable , Sortable , Searchable , Identifiable , Equatable {
       
     public let id : UUID = UUID()
@@ -24,7 +26,7 @@ public struct AnyKey<Root : Sendable> : Sendable , Sortable , Searchable , Ident
    
     
     
-    public let partialKey : PartialKeyPath<Root>
+    
    
     public func stringify(_ model : Root ) -> [String] {
         
@@ -57,7 +59,7 @@ public extension AnyKey {
             return await key.search(in: models, for: query,strategy: strategy)
 
         }
-        partialKey = key as PartialKeyPath<Root>
+        
 
     }
     init<Key : CustomStringConvertible, Stringer : Stringifier>(_ key : KeyPath<Root,Key>, stringer : Stringer) where Key : Comparable ,Stringer.Model == Key  {
@@ -78,7 +80,7 @@ public extension AnyKey {
             return await key.search(in: models, for: query,strategy: strategy)
 
         }
-        partialKey = key as PartialKeyPath<Root>
+        
     }
 
 }
@@ -101,7 +103,7 @@ public extension AnyKey {
             return await key.search(in: models, for: query,strategy: strategy)
             
         }
-        partialKey = key.key as PartialKeyPath<Root>
+        
     }
 }
 
@@ -123,7 +125,7 @@ public extension AnyKey {
             return await key.search(in: models, for: query,strategy: strategy)
             
         }
-        partialKey = key.key as PartialKeyPath<Root>
+        
         
         
         
@@ -149,7 +151,7 @@ public extension AnyKey  {
             return await key.search(in: models, for: query,strategy: strategy)
             
         }
-        partialKey = key.key as PartialKeyPath<Root>
+        
         
         
         
@@ -177,10 +179,18 @@ public extension AnyKey {
             return await key.search(in: models, for: query,strategy: strategy)
             
         }
-        partialKey = key.key as PartialKeyPath<Root>
-        
-        
-        
+    }
+    
+    init(_ key : AnyTitledKey<Root> ){
+        self.stringProducer = { model in
+            key.stringify(model)
+        }
+        self.searchProducer = { models , query , strategy in
+            await key.search(in: models, for: query,strategy: strategy)
+        }
+        self.sorterProducer = { models , order in
+            await key.sort(models , order: order)
+        }
     }
 }
 

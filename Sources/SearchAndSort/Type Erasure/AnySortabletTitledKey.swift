@@ -54,6 +54,18 @@ extension AnySortableTitledKey {
         }
         
     }
+    init(_ key : AnyTitledKey<Model>){
+        self.title = key.title
+        self.sortFunc = {model,order in
+            await key.sort(model,order: order)
+        }
+    }
+    init(_ key : AnySortableKey<Model> , title : String){
+        self.sortFunc = { models, order in
+            await key.sort(models, order: order)
+        }
+        self.title = title
+    }
 }
 extension AnySortableTitledKey : Hashable {
     public func hash(into hasher: inout Hasher) {
