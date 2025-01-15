@@ -49,6 +49,20 @@ public extension AnySearchableKey {
             
         }
     }
+    init<Key:CustomStringConvertible , Stringer : Stringifier> (_ key : KeyPath<Root, Key> , stringer : Stringer )
+    where Stringer.Model == Key{
+        
+        self.stringProducer = { model in
+            return stringer.stringify( model[keyPath: key])
+        }
+        self.partialKey = key
+        searchProducer = { models , query,strategy in
+            let key = SearchableKeyPath(key , stringifier: stringer)
+            
+            return await key.search(in: models, for: query,strategy: strategy)
+            
+        }
+    }
 
 }
 
