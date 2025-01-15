@@ -6,7 +6,8 @@
 //
 import Foundation
 public struct PersianDoubleStringifier : Stringifier , Sendable {
-    static let persian : PersianDoubleStringifier = .init() 
+    public let id: UUID = UUID()
+    static let persian : PersianDoubleStringifier = .init()
     public func stringify(_ model: Double) -> [String] {
         var results : [String] = [model.description , model.formatted()]
         let formatter = NumberFormatter()

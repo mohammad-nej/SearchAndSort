@@ -4,9 +4,14 @@
 //
 //  Created by MohammavDev on 1/15/25.
 //
+import Foundation
+public struct AnySearchableTitledKey<Model : Sendable> : Sendable , Searchable,Identifiable ,Equatable {
 
-public struct AnySearchableTitledKey<Model : Sendable> : Sendable , Searchable {
-
+    public let id : UUID = UUID()
+    public static func  == (lhs: AnySearchableTitledKey<Model>, rhs: AnySearchableTitledKey<Model>) -> Bool {
+        return lhs.id == rhs.id
+    }
+    
     public let title : String
     public let key : PartialKeyPath<Model>
     

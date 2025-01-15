@@ -9,7 +9,7 @@ import Foundation
 
 
 public struct PersianDateStringifier : Stringifier , Sendable {
-
+    public let id : UUID = UUID()
     public func stringify(_ model: Date) -> [String] {
         var results : [String] = []
         let formatter = DateFormatter()

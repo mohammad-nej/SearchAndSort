@@ -4,11 +4,15 @@
 //
 //  Created by MohammavDev on 1/15/25.
 //
-
-public struct AnySortableTitledKey<Model: Sendable>:  Sortable {
+import Foundation
+public struct AnySortableTitledKey<Model: Sendable>:  Sortable,Identifiable,Equatable {
     
     private let sortFunc : @Sendable ([Model],SortOrder) async -> [Model]
     
+    public let id : UUID = UUID()
+    public static func  == (lhs: AnySortableTitledKey<Model>, rhs: AnySortableTitledKey<Model>) -> Bool {
+        return lhs.id == rhs.id
+    }
     
     public let title : String
     

@@ -10,7 +10,13 @@ import Foundation
 
 
 ///A type-erasure to store all kinds of SortableKeyPath, TitledKey in a single array (as long as they have the same Model type).
-public struct AnySortableKey<Model : Sendable> : Sendable , Sortable{
+public struct AnySortableKey<Model : Sendable> : Sendable , Sortable,Identifiable,Equatable{
+    
+    public let id : UUID = UUID()
+    public static func  == (lhs: AnySortableKey<Model>, rhs: AnySortableKey<Model>) -> Bool {
+        return lhs.id == rhs.id
+    }
+    
     
     typealias Value = Comparable
     private let closure : @Sendable ([Model],SortOrder) async -> [Model]

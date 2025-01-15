@@ -14,7 +14,7 @@ public struct SortableKeyPath<M : Sendable,K : Comparable> : SortableKeyPathProt
     
     
         
-    
+    public let id = UUID()
     
     
     public typealias Model = M

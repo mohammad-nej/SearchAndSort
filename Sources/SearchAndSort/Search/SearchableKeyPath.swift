@@ -9,7 +9,7 @@ import Foundation
 public struct SearchableKeyPath<Model : Sendable ,Key , Stringified : Stringifier> : SearchableKeyProtocol,Sendable where Stringified.Model == Key  {
     public var stringer: Stringified
     
-    
+    public let id = UUID()
     public typealias Item = Model
     
     public typealias Key = Key

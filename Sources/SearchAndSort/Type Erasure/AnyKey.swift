@@ -7,9 +7,13 @@
 
 import Foundation
 
-public struct AnyKey<Root : Sendable> : Sendable , Sortable , Searchable {
-        
- 
+public struct AnyKey<Root : Sendable> : Sendable , Sortable , Searchable , Identifiable , Equatable {
+      
+    public let id : UUID = UUID()
+    public static func  == (lhs: AnyKey<Root>, rhs: AnyKey<Root>) -> Bool {
+        return lhs.id == rhs.id
+    }
+    
     private let stringProducer :  @Sendable (Root) -> [String]
     
     private let sorterProducer : @Sendable ([Root], SortOrder) async-> [Root]
@@ -17,7 +21,7 @@ public struct AnyKey<Root : Sendable> : Sendable , Sortable , Searchable {
     private let searchProducer : @Sendable ([Root], String, SearchStrategy) async -> [Root]?
     
     
-    
+   
     
     
     public let partialKey : PartialKeyPath<Root>

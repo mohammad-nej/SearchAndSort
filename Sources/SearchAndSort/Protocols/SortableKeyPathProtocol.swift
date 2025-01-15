@@ -4,11 +4,11 @@
 //
 //  Created by MohammavDev on 1/10/25.
 //
-
-public protocol  SortableKeyPathProtocol : ValuePresentable,Sortable, Sendable{
+import Foundation
+public protocol  SortableKeyPathProtocol : ValuePresentable,Sortable, Sendable , Identifiable,Equatable{
     //associatedtype Model : Sendable
     associatedtype Key : Comparable
-    
+    var id : UUID { get}
     var key : KeyPath<Model, Key> { get }
     
 }

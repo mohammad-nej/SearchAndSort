@@ -8,7 +8,7 @@
 import Foundation
 
 public struct PersianIntStringifier : Stringifier, Sendable {
-    
+    public let id : UUID = UUID()
     public func stringify(_ model: Int) -> [String] {
         var results = [model.formatted(),model.description]
         

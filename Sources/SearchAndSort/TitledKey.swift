@@ -9,9 +9,12 @@
 import Foundation
 import Foundation
 
-public struct TitledKey<Model : Sendable ,Key , Stringified : Stringifier> : SearchableKeyProtocol , Sendable where Stringified.Model == Key {
+public struct TitledKey<Model : Sendable ,Key , Stringified : Stringifier> : SearchableKeyProtocol , Sendable , Identifiable,Equatable where Stringified.Model == Key {
     
-    
+    public let id : UUID = UUID()
+    public static func  == (lhs: TitledKey<Model,Key,Stringified>, rhs: TitledKey<Model,Key,Stringified>) -> Bool {
+        return lhs.id == rhs.id
+    }
     
     
     public typealias Item = Model
@@ -22,6 +25,7 @@ public struct TitledKey<Model : Sendable ,Key , Stringified : Stringifier> : Sea
     
     public typealias Model = Model
         
+    
     
     public var stringer: Stringified
     public var title: String

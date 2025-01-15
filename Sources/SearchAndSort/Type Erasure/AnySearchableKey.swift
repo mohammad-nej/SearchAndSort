@@ -2,8 +2,13 @@ import Foundation
 
 ///A type erasure to store all kinds of SearchableKeyPath , TitledKey types in an array
 ///as long as they have the same Model type
-public struct AnySearchableKey<Root : Sendable> : Sendable, Searchable{
+public struct AnySearchableKey<Root : Sendable> : Sendable, Searchable , Identifiable,Equatable{
  
+    public let id : UUID = UUID()
+    public static func  == (lhs: AnySearchableKey<Root>, rhs: AnySearchableKey<Root>) -> Bool {
+        return lhs.id == rhs.id
+    }
+    
     private let stringProducer :  @Sendable (Root) -> [String]
     private let searchProducer : @Sendable ([Root], String, SearchStrategy) async -> [Root]?
     public let partialKey : PartialKeyPath<Root>

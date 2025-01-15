@@ -9,9 +9,11 @@
 import Foundation
 import Foundation
 
-public protocol Stringifier : Sendable  {
+public protocol Stringifier : Sendable , Identifiable , Equatable {
     
     associatedtype Model 
+    
+    var id : UUID { get }
     
     func stringify(_ model : Model) -> [String]
 }
