@@ -49,7 +49,7 @@ public extension AnySearchableKey {
             
         }
     }
-    init<Key:CustomStringConvertible , Stringer : Stringifier> (_ key : KeyPath<Root, Key> , stringer : Stringer )
+    init<Key, Stringer : Stringifier> (_ key : KeyPath<Root, Key> , stringer : Stringer )
     where Stringer.Model == Key{
         
         self.stringProducer = { model in

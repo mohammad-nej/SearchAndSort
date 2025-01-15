@@ -180,7 +180,7 @@ public extension AnyKey  {
 
 public extension AnyKey {
     ///Initiates a key from a TitledKey
-    init <Key: CustomStringConvertible, Stringer : Stringifier> (_ key : TitledKey<Root,Key,Stringer>, sortOrder : SortOrder) where Key : Comparable , Stringer.Model == Key {
+    init <Key, Stringer : Stringifier> (_ key : TitledKey<Root,Key,Stringer>, sortOrder : SortOrder) where Key : Comparable , Stringer.Model == Key {
         let stringer = key.stringer
         self.stringProducer = { model in
             return stringer.stringify(model[keyPath: key.key])
