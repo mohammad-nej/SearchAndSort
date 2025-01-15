@@ -10,9 +10,11 @@ import Foundation
 
 
 public struct SortableKeyPath<M : Sendable,K : Comparable> : SortableKeyPathProtocol, Sendable{
+    public typealias Models = Model
+    
     
         
-    public var order: SortOrder
+    
     
     
     public typealias Model = M
@@ -26,9 +28,9 @@ public struct SortableKeyPath<M : Sendable,K : Comparable> : SortableKeyPathProt
     
    
     
-    public init(_ key: KeyPath<Model,Key> , order : SortOrder ) {
+    public init(_ key: KeyPath<Model,Key> ) {
         self.key = key
-        self.order = order
+        
     }
 }
 

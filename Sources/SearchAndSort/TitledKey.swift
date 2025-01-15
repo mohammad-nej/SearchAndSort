@@ -59,15 +59,15 @@ public extension TitledKey where Key : CustomStringConvertible, Key : Comparable
         
     }
 }
-public extension TitledKey where Key : Comparable {
+extension TitledKey : Sortable where Key : Comparable {
     
-    func sort(_ items : [Model] , order : SortOrder) async -> [Model] {
-        let sortable = SortableKeyPath(self.key, order: order)
+    public func sort(_ items : [Model] , order : SortOrder) async -> [Model] {
+        let sortable = SortableKeyPath(self.key)
         
-        return await sortable.sort(items)
+        return await sortable.sort(items, order: order)
     }
 }
-public extension TitledKey {
+public extension TitledKey{
     func search(in models : [Model] , for query : String, strategy: SearchStrategy = .contains) async-> [Model]? {
         let searcher = BackgroundSearcher(models:models,keys: [.init(self)],strategy: strategy)
         return await searcher.search(query)

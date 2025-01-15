@@ -5,13 +5,11 @@
 //  Created by MohammavDev on 1/10/25.
 //
 
-public protocol  SortableKeyPathProtocol : ValuePresentable, Sendable{
+public protocol  SortableKeyPathProtocol : ValuePresentable,Sortable, Sendable{
     //associatedtype Model : Sendable
     associatedtype Key : Comparable
     
     var key : KeyPath<Model, Key> { get }
-    
-    var order : SortOrder { get }
     
 }
 public extension SortableKeyPathProtocol{
@@ -33,8 +31,5 @@ public extension SortableKeyPathProtocol{
             }
         }.value
         
-    }
-    func sort(_ models : [Model]) async -> [Model] {
-        await sort(models, order: order)
     }
 }

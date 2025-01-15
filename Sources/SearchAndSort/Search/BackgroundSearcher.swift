@@ -50,12 +50,12 @@ public final actor BackgroundSearcher<T : Sendable>  {
     public var maxNumberOfElementsInEachChunk : Int = 1000
     
     ///Keys that the searcher can search based of them.
-    public let keys : [AnySearchableKey<T>]
+    public let keys : [AnySearchableTitledKey<T>]
     
     
-    public init (models : [T] , keys : [AnyKey<T>],strategy: SearchStrategy = .contains ,useWildCards : Bool = true){
+    public init (models : [T] , keys : [AnySearchableTitledKey<T>],strategy: SearchStrategy = .contains ,useWildCards : Bool = true){
         _allModels = models
-        self.keys = keys.map{ $0.anySearchableKey}
+        self.keys = keys
         self.useWildCards = useWildCards
         self.searchStrategy = strategy
     }
@@ -64,14 +64,14 @@ public final actor BackgroundSearcher<T : Sendable>  {
     public init(models : [T]  , keys : [AnySearchableKey<T>]  ,strategy: SearchStrategy = .contains ,useWildCards : Bool = true){
         
         _allModels = models
-        self.keys = keys
+        self.keys = keys.map{ AnySearchableTitledKey($0,title:"")}
         self.useWildCards = useWildCards
         self.searchStrategy = strategy
     }
     
     
     
-    private func multiThreadSearch(_ query : String , withKeys key : [AnySearchableKey<T>]? = nil) async  -> [T]? {
+    private func multiThreadSearch(_ query : String , withKeys key : [AnySearchableTitledKey<T>]? = nil) async  -> [T]? {
         
         let maxNumberOfElementsInEachChunk = self.maxNumberOfElementsInEachChunk
         let maxNumberOfThreads = self.maxNumberOfThreads
@@ -146,7 +146,7 @@ public final actor BackgroundSearcher<T : Sendable>  {
         
         
     }
-    private func singleThreadSearch(_ query : String , models: ArraySlice<T> ,withKeys key : [AnySearchableKey<T>]? = nil) async  -> [T]? {
+    private func singleThreadSearch(_ query : String , models: ArraySlice<T> ,withKeys key : [AnySearchableTitledKey<T>]? = nil) async  -> [T]? {
         var resutls : [T] = []
         let allModels = models
         let searchingKeys = key == nil ? self.keys : key!
@@ -188,7 +188,7 @@ public final actor BackgroundSearcher<T : Sendable>  {
     ///You can pass a key to limit Searcher to that specefic keys, otherwise it will itterate over all the keys.
     ///This function use Task.detached internally so it will always run off the main thread
     ///search function will return empty array if doesn't find anything. nil is returned if a task is canceled before completion.
-    public func search(_ query : String , withKey key : [AnySearchableKey<T>]? = nil, strategy : SearchStrategy? = nil) async -> [T]? {
+    public func search(_ query : String , withKey key : [AnySearchableTitledKey<T>]? = nil, strategy : SearchStrategy? = nil) async -> [T]? {
         logger.debug("Start searching for \(query)...")
         let backup = searchStrategy
         defer{
@@ -226,7 +226,7 @@ public final actor BackgroundSearcher<T : Sendable>  {
             }
         }.value
     }
-    private func singleThreadSearch(_ query : String , models: [T] ,withKeys key : [AnySearchableKey<T>]? = nil) async -> [T]? {
+    private func singleThreadSearch(_ query : String , models: [T] ,withKeys key : [AnySearchableTitledKey<T>]? = nil) async -> [T]? {
         
         var resutls : [T] = []
         let allModels = _allModels

@@ -2,7 +2,7 @@ import Foundation
 
 ///A type erasure to store all kinds of SearchableKeyPath , TitledKey types in an array
 ///as long as they have the same Model type
-public struct AnySearchableKey<Root : Sendable> : Sendable{
+public struct AnySearchableKey<Root : Sendable> : Sendable, Searchable{
  
     private let stringProducer :  @Sendable (Root) -> [String]
     private let searchProducer : @Sendable ([Root], String, SearchStrategy) async -> [Root]?

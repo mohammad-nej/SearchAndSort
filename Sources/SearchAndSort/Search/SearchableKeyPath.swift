@@ -35,3 +35,10 @@ extension SearchableKeyPath  {
         
     }
 }
+extension SearchableKeyPath : Sortable where Key : Comparable  {
+    public func sort(_ models: [Item], order: SortOrder) async -> [Item] {
+        return await  SortableKeyPath(key).sort(models, order: order)
+    }
+    
+    
+}

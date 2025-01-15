@@ -39,6 +39,15 @@ struct Tests {
     let key = TitledKey(title: "Grade", key: \Student.grade)
     let key2 = TitledKey(title: "Name", key: \Student.name)
    
+    let students : [Student] = [
+        .init(name: "John", age: 20, grade: 12.5, birthDate: .now ,family:.init(name: "Potter")),
+        .init(name: "Jane", age: 21, grade: 13.5, birthDate: .now ,family:.init(name: "Potter")),
+        .init(name: "Jack", age: 22, grade: 14.5, birthDate: .now ,family:.init(name: "Potter")),
+        .init(name: "Jill", age: 23, grade: 15.5, birthDate: .now ,family:.init(name: "Potter")),
+        .init(name: "John", age: 24, grade: 16.5, birthDate: .now ,family:.init(name: "Potter")),
+        .init(name: "Jane", age:25, grade: 17.5, birthDate: .now ,family:.init(name: "Potter"))
+    ]
+    
     @Test func TypeErasureTest() async throws {
         
         
@@ -55,9 +64,9 @@ struct Tests {
         let studensts = [hamid,ali]
             
         let searchableName = SearchableKeyPath(\Student.family, stringifier: FamilyStringifier())
-        let namePath = SortableKeyPath(\Student.name, order: .ascending)
+        let namePath = SortableKeyPath(\Student.name)
         
-        let ageKeyPath = SortableKeyPath(\Student.age, order: .descending)
+        let ageKeyPath = SortableKeyPath(\Student.age)
         //let ageKeyPath = SortableTitledKeyPath(title: "Age", key: \Student.age)
         
         let titledKey = TitledKey(title: "Name", key: namePath )
@@ -73,7 +82,7 @@ struct Tests {
         //let errorSorter = AnySorter(familyKey,order: .init(from: .ascending))
         
                 
-        let sortedByAge = await AnySortableKey(ageKeyPath).sorted(studensts)
+        let sortedByAge = await AnySortableKey(ageKeyPath).sort(studensts,order:.descending)
         #expect(studensts[1] == sortedByAge[1])
         #expect(studensts[0] == sortedByAge[0])
         
@@ -111,38 +120,50 @@ struct Tests {
     func myTests () async throws {
         let key = AnySearchableKey(\Student.family)
         
-        let ket3 = AnyKey(\Student.name, sortOrder: .ascending)
+        let ket3 = AnyKey(\Student.name)
         
-        let key5 = AnyKey(\Student.grade, sortOrder: .descending)
+        let key5 = AnyKey(\Student.grade)
         //let sortableKey = SortableKeyPath(\Student.name, order: .ascending)
         
         //let anySortable = AnySortableKey(sortableKey)
         
-        let sortableKey = SortableKeyPath(\Student.name, order: .ascending)
+        let sortableKey = SortableKeyPath(\Student.name)
         let birthDayKey = SearchableKeyPath(\Student.birthDate,stringifier: .persian)
-        let nameKey = TitledKey(title: "Name", key: \Student.name)
+        let sortablekey2 = SortableKeyPath(\Student.grade)
+        let sortableKey3 = SortableKeyPath(\Int.self)
         
-        let anykey = AnyKey(birthDayKey,sortOrder: .ascending)
-        let anyKey2 = AnyKey(nameKey,sortOrder:.ascending)
+        let nameKey = TitledKey(title: "Name", key: \Student.name)
+        let ageKey = TitledKey(title: "Age", key: \Student.age)
+        
+        let backSearcher = BackgroundSearcher(models: students, keys: [.init(nameKey),.init(ageKey)])
+        
+        let sorter = Sorter(models: students, keys: [.init(nameKey),.init(ageKey), .init(sortablekey2,title: "something")])
+        
+        
+        let anykey = AnyKey(birthDayKey)
+        let anyKey2 = AnyKey(nameKey)
         let anyKey3 = AnyKey(sortableKey)
+        
+        let searchables : [any Searchable] = [birthDayKey , key]
+        let sortables : [any Sortable] = [sortableKey , sortablekey2, sortableKey3]
+        let anyKey : [any SearchAndSortable] = [birthDayKey , nameKey]
+        
+        
+        
+        let anySortable : [AnySortableKey<Student>] = [.init(sortableKey) , .init(sortablekey2) , //,.init(sortableKey3)
+            .init(nameKey) ]
+        //anyKey[0].sort(<#T##models: [any SearchAndSortable.Models]##[any SearchAndSortable.Models]#>, order: <#T##SortOrder#>)
         
     }
     @Test func sortTest() async throws {
-        let studnets : [Student] = [
-            .init(name: "John", age: 20, grade: 12.5, birthDate: .now ,family:.init(name: "Potter")),
-            .init(name: "Jane", age: 21, grade: 13.5, birthDate: .now ,family:.init(name: "Potter")),
-            .init(name: "Jack", age: 22, grade: 14.5, birthDate: .now ,family:.init(name: "Potter")),
-            .init(name: "Jill", age: 23, grade: 15.5, birthDate: .now ,family:.init(name: "Potter")),
-            .init(name: "John", age: 24, grade: 16.5, birthDate: .now ,family:.init(name: "Potter")),
-            .init(name: "Jane", age:25, grade: 17.5, birthDate: .now ,family:.init(name: "Potter"))
-        ]
+      
         
         let grade = TitledKey(title: "Grade", key: \Student.grade)
-        let nameKey = SortableKeyPath(\Student.name, order: .descending)
+        let nameKey = SortableKeyPath(\Student.name)
         //let sortedArray = nameKey.sort(students, order: .ascending)
-        let sortedArray = await grade.sort(studnets, order: .descending)
+        let sortedArray = await grade.sort(students,order: .descending)
         
-        let keys : [AnySortableKey] = [.init(grade,order: .descending) , .init(nameKey)]
+        let keys : [AnySortableKey] = [.init(grade) , .init(nameKey)]
         
         #expect(sortedArray[0].grade == 17.5)
         #expect(sortedArray.last!.grade == 12.5)
@@ -161,10 +182,10 @@ struct Tests {
         let nameKey = SearchableKeyPath(\Student.family)
         let ageKey = SearchableKeyPath(\Student.age)
         
-        let anyNamekey = AnyKey(\Student.name, sortOrder: .ascending)
+        let anyNamekey = AnyKey(\Student.name)
         
         let name = AnySearchableKey(\Student.name)
-        let age = AnySortableKey(\Student.name, order: .ascending)//.sorted(<#T##models: [_]##[_]#>, order: <#T##SortOrder?#>)
+        let age = AnySortableKey(\Student.name)//.sorted(<#T##models: [_]##[_]#>, order: <#T##SortOrder?#>)
         BackgroundSearcher(models: studnets, keys: [.init(\Student.name)])
         let searchResult = await ageKey.search(in:studnets , for: "Sara", strategy: .contains)
         
