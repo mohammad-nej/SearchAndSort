@@ -29,6 +29,9 @@ public struct SearchableKeyPath<Model : Sendable ,Key , Stringified : Stringifie
 }
 
 extension SearchableKeyPath  {
+    
+   
+    
     public init(_ key : KeyPath<Model, Key>) where Key : CustomStringConvertible, Stringified == StringConvertableStringifier<Key> {
         self.key = key
         self.stringer = StringConvertableStringifier<Key>()

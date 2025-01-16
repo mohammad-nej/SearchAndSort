@@ -19,3 +19,14 @@ public struct StringConvertableStringifier< T : CustomStringConvertible> : Strin
     
     
 }
+//public struct NullableStringConvertableStringifier< T : Optionals> : Stringifier{
+//    public let id = UUID()
+//    public func stringify(_ model: T?) -> [String] {
+//        guard let model = model else {
+//            return []
+//        }
+//        return [model.opt. ?? "null"]
+//    }
+//    
+//    public typealias Model = T?
+//}

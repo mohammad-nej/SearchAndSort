@@ -43,9 +43,6 @@
                <Test
                   Identifier = "Tests/cancelationTest()">
                </Test>
-               <Test
-                  Identifier = "Tests/cancelationTest()">
-               </Test>
             </SkippedTests>
          </TestableReference>
       </Testables>

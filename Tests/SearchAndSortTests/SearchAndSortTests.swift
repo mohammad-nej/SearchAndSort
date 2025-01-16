@@ -27,7 +27,7 @@ struct Student : Identifiable , Equatable {
     let age : Int
     let grade : Double
     let birthDate : Date
-    
+    var optionalAge : Int?
     let family : Family
 }
 
@@ -162,6 +162,57 @@ struct Tests {
         //anyKey[0].sort(<#T##models: [any SearchAndSortable.Models]##[any SearchAndSortable.Models]#>, order: <#T##SortOrder#>)
         
     }
+    
+    @Test func optionalStringifier() async throws {
+        
+        let stringer = StringConvertableStringifier<String?>()
+        
+        #expect(stringer.stringify(nil) == ["nil"])
+        #expect(stringer.stringify("Hello") == ["Hello"])
+        
+        let key : PartialKeyPath<Student> = \Student.name
+        
+        let value = SearchableKeyPath(\Student.optionalAge)
+        let value2 = SortableKeyPath(\Student.optionalAge)
+        
+    }
+    
+    ///Sorting with a nullable key
+    @Test func nilSortTest() async throws {
+        
+        var models : [Student] = [ .init(name: "Ali", age: 12, grade: 17.5, birthDate: .now, family: .init(name: "Taghavli")),
+                                   .init(name: "Sara", age: 12, grade: 17.5, birthDate: .now, optionalAge: 20, family: .init(name: "Taher")) ,
+                                   .init(name: "Mohsen", age: 12, grade: 17.5, birthDate: .now, family: .init(name: "Taghavli"))
+                                ]
+        let sortKey = AnySortableKey(\Student.optionalAge)
+        
+        var sorted = await sortKey.sort(models, order: .ascending)
+        
+        
+        #expect(sorted[0].name == "Ali")
+        #expect(sorted[1].name == "Mohsen")
+        #expect(sorted[2].name == "Sara")
+        
+        sorted = await sortKey.sort(models, order: .descending)
+        
+        #expect(sorted[0].name == "Sara")
+        #expect(sorted[1].name == "Ali")
+        #expect(sorted[2].name == "Mohsen")
+        
+        models[2] = .init(name: "Mohsen", age: 12, grade: 17.5, birthDate: .now, optionalAge: 34 ,family: .init(name: "Taghavli"))
+        
+        sorted = await sortKey.sort(models, order: .descending)
+        #expect(sorted[0].name == "Mohsen")
+        #expect(sorted[1].name == "Sara")
+        #expect(sorted[2].name == "Ali")
+        
+        sorted = await sortKey.sort(models, order: .ascending)
+        #expect(sorted[0].name == "Ali")
+        #expect(sorted[1].name == "Sara")
+        #expect(sorted[2].name == "Mohsen")
+        
+        
+    }
     @Test func sortTest() async throws {
       
         
@@ -189,7 +240,7 @@ struct Tests {
         let nameKey = SearchableKeyPath(\Student.family)
         let ageKey = SearchableKeyPath(\Student.age)
         
-        let searchable = AnyKey(\Student.family,stringer: FamilyStringifier())
+        //let searchable = AnyKey(\Student.family,stringer: FamilyStringifier())
         let anyNamekey = AnyKey(\Student.name)
         
         let name = AnySearchableKey(\Student.name)
